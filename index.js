@@ -144,6 +144,7 @@ async function register() {
 
   users[username] = {
     password: await hashPassword(password),
+    role: username === "sunesis_admin" ? "sunesis_admin" : "user",
   };
 
   localStorage.setItem("sunesis_users", JSON.stringify(users));
