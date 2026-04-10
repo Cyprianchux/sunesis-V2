@@ -11,6 +11,8 @@ function logout() {
   sessionStorage.clear();
   localStorage.removeItem("sunesis_remember");
   localStorage.removeItem("sunesis_user");
+  localStorage.removeItem("sunesis_token");
+  localStorage.removeItem("sunesis_role");
   window.location.href = "index.html";
 }
 
@@ -78,6 +80,15 @@ function resetValidationColors(prefix) {
 }
 
 // Reset all validation colors for both register and login
+async function saveLocalUser(username, password, role) {
+  const users = JSON.parse(localStorage.getItem("sunesis_users")) || {};
+  users[username] = {
+    password: await hashPassword(password),
+    role,
+  };
+  localStorage.setItem("sunesis_users", JSON.stringify(users));
+}
+
 function resetAllValidationColors() {
   resetValidationColors("reg");
   resetValidationColors("login");
@@ -135,6 +146,7 @@ async function register() {
     return;
   }
 
+  const role = username === "sunesis_admin" ? "sunesis_admin" : "user";
   const users = JSON.parse(localStorage.getItem("sunesis_users")) || {};
 
   if (users[username]) {
@@ -142,13 +154,27 @@ async function register() {
     return;
   }
 
-  users[username] = {
-    password: await hashPassword(password),
-    role: username === "sunesis_admin" ? "sunesis_admin" : "user",
-  };
+  if (isOnline()) {
+    try {
+      await remoteRegister(username, password, role);
+      await saveLocalUser(username, password, role);
+      showPopup("Registration successful. Please login.", "success");
+      clearInputs(regUser, regPass, confirmPass);
+      showLogin();
+      return;
+    } catch (error) {
+      if (error.message.includes("User already exists")) {
+        showPopup(error.message, "error");
+        return;
+      }
+      showPopup(
+        "Unable to register online. Saving account locally for offline use.",
+        "info",
+      );
+    }
+  }
 
-  localStorage.setItem("sunesis_users", JSON.stringify(users));
-
+  await saveLocalUser(username, password, role);
   showPopup("Registration successful. Please login.", "success");
   clearInputs(regUser, regPass, confirmPass);
   showLogin();
@@ -160,16 +186,34 @@ async function login() {
   const password = loginPass.value;
 
   const users = JSON.parse(localStorage.getItem("sunesis_users")) || {};
-
-  if (!users[username]) {
-    showPopup("Invalid username or password", "error");
-    clearInputs(loginUser, loginPass);
-    return;
-  }
-
   const hash = await hashPassword(password);
 
-  if (hash !== users[username].password) {
+  if (isOnline()) {
+    try {
+      const response = await remoteLogin(username, password);
+      saveRemoteSession(response.user, response.token, rememberMe.checked);
+      await saveLocalUser(username, password, response.user.role);
+      if (rememberMe.checked) {
+        localStorage.setItem("sunesis_remember", "true");
+        localStorage.setItem("sunesis_user", username);
+      }
+      sessionStorage.setItem("sunesis_logged_in", "true");
+      sessionStorage.setItem("sunesis_user", username);
+
+      showPopup("Login successful", "success");
+      clearInputs(loginUser, loginPass);
+      setTimeout(() => {
+        window.location.href = "account.html";
+      }, 900);
+      return;
+    } catch (error) {
+      if (error.message !== "Offline") {
+        showPopup("Backend login failed. Trying offline mode if available.", "info");
+      }
+    }
+  }
+
+  if (!users[username] || hash !== users[username].password) {
     showPopup("Invalid username or password", "error");
     clearInputs(loginUser, loginPass);
     return;
@@ -178,13 +222,14 @@ async function login() {
   if (rememberMe.checked) {
     localStorage.setItem("sunesis_remember", "true");
     localStorage.setItem("sunesis_user", username);
+    localStorage.setItem("sunesis_role", users[username].role);
   }
 
   sessionStorage.setItem("sunesis_logged_in", "true");
   sessionStorage.setItem("sunesis_user", username);
+  sessionStorage.setItem("sunesis_role", users[username].role);
 
   showPopup("Login successful", "success");
-
   clearInputs(loginUser, loginPass);
 
   setTimeout(() => {

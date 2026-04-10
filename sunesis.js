@@ -19,7 +19,10 @@ function requireAuth(redirectUrl = "index.html") {
 
 function isAdminUser(user = getActiveUser()) {
   const users = JSON.parse(localStorage.getItem("sunesis_users")) || {};
-  return users[user]?.role === "sunesis_admin";
+  const localRole = users[user]?.role;
+  const remoteRole =
+    sessionStorage.getItem("sunesis_role") || localStorage.getItem("sunesis_role");
+  return localRole === "sunesis_admin" || remoteRole === "sunesis_admin";
 }
 
 async function getTopicByName(name) {
@@ -147,6 +150,147 @@ function initDB() {
   });
 }
 
+function getRemoteUserRole() {
+  return (
+    sessionStorage.getItem("sunesis_role") ||
+    localStorage.getItem("sunesis_role") ||
+    "user"
+  );
+}
+
+function isRemoteAdmin() {
+  return getRemoteUserRole() === "sunesis_admin";
+}
+
+function getTopicByNameLocal(name) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("topics", "readonly");
+    const store = tx.objectStore("topics");
+    const request = store.get(name);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function getSlideById(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("slides", "readonly");
+    const store = tx.objectStore("slides");
+    const request = store.get(Number(id));
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function getSlideByRemoteId(remoteId) {
+  const slides = await getAllSlides();
+  return slides.find((item) => Number(item.remoteId) === Number(remoteId));
+}
+
+function saveLocalTopic(topic) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("topics", "readwrite");
+    const store = tx.objectStore("topics");
+    const request = store.put(topic);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function saveLocalSlide(slide) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("slides", "readwrite");
+    const store = tx.objectStore("slides");
+    const request = store.put(slide);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function syncLocalToRemote() {
+  if (!isOnline()) return;
+  const activeUser = getActiveUser();
+  if (!activeUser) return;
+
+  const topics = await getAllTopics();
+  for (const topic of topics) {
+    if (topic.creator !== activeUser || topic.remoteSynced) continue;
+
+    try {
+      await remoteCreateTopic(topic.name);
+      topic.remoteSynced = true;
+      await saveLocalTopic(topic);
+    } catch (error) {
+      if (error.message.includes("Topic already exists")) {
+        topic.remoteSynced = true;
+        await saveLocalTopic(topic);
+      }
+    }
+  }
+
+  const slides = await getAllSlides();
+  for (const slide of slides) {
+    if (slide.creator !== activeUser || slide.remoteSynced) continue;
+
+    try {
+      const created = await remoteCreateSlide({
+        topic: slide.topic,
+        title: slide.title,
+        desc: slide.desc,
+        media: slide.media,
+        type: slide.type,
+      });
+      slide.remoteId = created.id;
+      slide.remoteSynced = true;
+      await saveLocalSlide(slide);
+    } catch (error) {
+      console.warn("Slide sync failed:", error.message);
+    }
+  }
+}
+
+async function syncRemoteToLocal() {
+  if (!isOnline()) return;
+
+  try {
+    const remoteTopics = await remoteFetchTopics();
+    for (const topic of remoteTopics) {
+      await saveLocalTopic({
+        ...topic,
+        remoteSynced: true,
+      });
+    }
+
+    const remoteSlides = await remoteFetchSlides();
+    for (const slide of remoteSlides) {
+      const existing = await getSlideByRemoteId(slide.id);
+      const localSlide = {
+        topic: slide.topic,
+        title: slide.title,
+        desc: slide.desc,
+        media: slide.media,
+        type: slide.type,
+        creator: slide.creator,
+        createdAt: slide.created_at,
+        remoteId: slide.id,
+        remoteSynced: true,
+      };
+      if (existing) {
+        localSlide.id = existing.id;
+      }
+      await saveLocalSlide(localSlide);
+    }
+  } catch (error) {
+    console.warn("Remote sync failed:", error.message);
+  }
+}
+
+async function syncAllRemoteData() {
+  if (!isOnline()) return;
+  await syncLocalToRemote();
+  await syncRemoteToLocal();
+}
+
 // DATABASE FUNCTIONS
 
 // ---- Topics ----
@@ -156,7 +300,12 @@ function createTopic(name) {
     const store = tx.objectStore("topics");
 
     const activeUser = getActiveUser();
-    const request = store.add({ name, creator: activeUser });
+    const request = store.add({
+      name,
+      creator: activeUser,
+      createdAt: new Date().toISOString(),
+      remoteSynced: false,
+    });
 
     request.onerror = () => {
       showPopup("Topic already exists.", "error");
@@ -190,9 +339,11 @@ function addSlide(slide) {
       ...slide,
       creator: activeUser,
       createdAt: new Date().toISOString(),
+      remoteSynced: false,
     };
-    store.add(slideToSave);
-    tx.oncomplete = resolve;
+    const request = store.add(slideToSave);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
     tx.onerror = () => reject(tx.error);
   });
 }
@@ -258,6 +409,15 @@ async function deleteSlideHandler(id) {
 
   if (!(await showConfirm("Delete this slide?"))) return;
   showPopup("Deleting slide...", "info");
+
+  if (isOnline() && slide?.remoteId) {
+    try {
+      await remoteDeleteSlide(slide.remoteId);
+    } catch (error) {
+      console.warn("Remote slide delete failed:", error.message);
+    }
+  }
+
   await deleteSlide(id);
   await displayAllTopics();
   await loadTopicsAdmin();
@@ -273,6 +433,15 @@ async function deleteSlidesFromTopicHandler(topicName) {
 
   if (!(await showConfirm(`Delete all slides from "${topicName}"?`))) return;
   showPopup(`Deleting all slides from "${topicName}"...`, "info");
+
+  if (isOnline()) {
+    try {
+      await remoteDeleteSlidesByTopic(topicName);
+    } catch (error) {
+      console.warn("Remote delete slides by topic failed:", error.message);
+    }
+  }
+
   await deleteSlidesByTopic(topicName);
   await displayAllTopics();
   showPopup(`All slides from "${topicName}" deleted.`, "success");
@@ -287,6 +456,14 @@ async function deleteTopicHandler(topicName) {
 
   if (!(await showConfirm(`Delete the topic "${topicName}" and all its slides?`))) return;
   showPopup(`Deleting topic "${topicName}" and all its slides...`, "info");
+
+  if (isOnline()) {
+    try {
+      await remoteDeleteTopic(topicName);
+    } catch (error) {
+      console.warn("Remote topic delete failed:", error.message);
+    }
+  }
 
   await deleteSlidesByTopic(topicName);
 
@@ -573,6 +750,15 @@ if (isViewPage) {
   });
 }
 
+window.addEventListener("online", async () => {
+  showPopup("Connection restored. Syncing online content...", "success");
+  await syncAllRemoteData();
+});
+
+window.addEventListener("offline", () => {
+  showPopup("You are offline. Local mode is active.", "info");
+});
+
 function displayCurrentSlide() {
   const display = document.getElementById("slideDisplay");
   if (slides.length === 0) {
@@ -697,6 +883,7 @@ function displayFilteredSlides(filteredSlides) {
 if (isAdminPage) {
   document.addEventListener("DOMContentLoaded", async () => {
     await initDB();
+    await syncAllRemoteData();
     await loadTopicsAdmin();
     displayAllTopics();
 
@@ -715,6 +902,29 @@ if (isAdminPage) {
           return;
         }
         await createTopic(name);
+        if (isOnline()) {
+          try {
+            await remoteCreateTopic(name);
+            const topic = await getTopicByNameLocal(name);
+            if (topic) {
+              topic.remoteSynced = true;
+              await saveLocalTopic(topic);
+            }
+          } catch (error) {
+            if (error.message.includes("Topic already exists")) {
+              const topic = await getTopicByNameLocal(name);
+              if (topic) {
+                topic.remoteSynced = true;
+                await saveLocalTopic(topic);
+              }
+            } else {
+              showPopup(
+                "Topic saved locally and will sync when online.",
+                "info",
+              );
+            }
+          }
+        }
         document.getElementById("topicName").value = "";
         await loadTopicsAdmin();
         displayAllTopics();
@@ -746,7 +956,23 @@ if (isAdminPage) {
           const reader = new FileReader();
           reader.onload = async (e) => {
             slide.media = e.target.result;
-            await addSlide(slide);
+            const localId = await addSlide(slide);
+            if (isOnline()) {
+              try {
+                const created = await remoteCreateSlide(slide);
+                const localSlide = await getSlideById(localId);
+                if (localSlide) {
+                  localSlide.remoteId = created.id;
+                  localSlide.remoteSynced = true;
+                  await saveLocalSlide(localSlide);
+                }
+              } catch (error) {
+                showPopup(
+                  "Slide saved locally and will sync when online.",
+                  "info",
+                );
+              }
+            }
             displayAllTopics();
             showPopup("Slide added successfully!", "success");
             document.getElementById("slide-title").value = "";
@@ -755,7 +981,23 @@ if (isAdminPage) {
           };
           reader.readAsDataURL(mediaFile);
         } else {
-          await addSlide(slide);
+          const localId = await addSlide(slide);
+          if (isOnline()) {
+            try {
+              const created = await remoteCreateSlide(slide);
+              const localSlide = await getSlideById(localId);
+              if (localSlide) {
+                localSlide.remoteId = created.id;
+                localSlide.remoteSynced = true;
+                await saveLocalSlide(localSlide);
+              }
+            } catch (error) {
+              showPopup(
+                "Slide saved locally and will sync when online.",
+                "info",
+              );
+            }
+          }
           displayAllTopics();
           showPopup("Slide added successfully!", "success");
           document.getElementById("slide-title").value = "";
@@ -775,6 +1017,17 @@ if (isAdminPage) {
 
         if (await showConfirm("Delete ALL topics and slides? This cannot be undone.")) {
           showPopup("Deleting ALL topics and slides...", "error");
+          if (isOnline()) {
+            try {
+              await remoteDeleteAll();
+            } catch (error) {
+              console.warn("Remote delete-all failed:", error.message);
+              showPopup(
+                "Unable to delete all content remotely. Local cleanup will continue.",
+                "info",
+              );
+            }
+          }
           await deleteAllTopicsAndSlides();
           await loadTopicsAdmin();
           displayAllTopics();
@@ -889,6 +1142,7 @@ if (isAccountPage) {
     document.getElementById("loginUser").textContent = formattedName;
 
     await initDB();
+    await syncAllRemoteData();
     renderTopicCards();
   });
 }
