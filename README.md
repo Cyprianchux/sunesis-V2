@@ -126,9 +126,10 @@ All data is stored safely in your browser. No external servers are required.
 ### Persistent Storage
 
 - Uses IndexedDB for high-performance browser storage
-- Data persists across sessions
+- Offline-first access with local persistence
+- Syncs with Supabase PostgreSQL backend when online
 - Creator and timestamp tracking
-- No server required
+- No server required for offline usage
 
 ---
 
@@ -142,6 +143,26 @@ All data is stored safely in your browser. No external servers are required.
 **Architecture:** Client-side SPA with permission layers
 **UI Icons:** Font Awesome 6
 **Responsive Design:** CSS Grid and Flexbox
+
+---
+
+## Backend & Sync Support
+
+Sunesis now includes a Node.js backend that connects to Supabase PostgreSQL for online persistence.
+
+- Express API server in `backend/server.js`
+- Supabase PostgreSQL tables for `users`, `topics`, and `slides`
+- Remote auth with account persistence across devices
+- Offline mode retained using IndexedDB in the browser
+- Automatic sync between local IndexedDB and the backend when connectivity returns
+- Admin account manages all content globally, normal users manage only their own created content
+
+### Backend Setup
+
+1. Setup `backend/.env`.
+2. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `JWT_SECRET`.
+3. Run `npm install` inside `backend` and start the server with `npm start`.
+4. Provision the Supabase schema using `backend/schema.sql`.
 
 ---
 
