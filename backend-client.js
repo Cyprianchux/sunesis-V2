@@ -1,4 +1,4 @@
-const BACKEND_BASE_URL = window.SUNESIS_BACKEND_URL || "http://localhost:3000";
+const API_BASE_URL = window.SUNESIS_API_URL || "http://localhost:3000";
 
 function isOnline() {
   return window.navigator.onLine;
@@ -17,12 +17,12 @@ function getRemoteAuthHeaders() {
   return headers;
 }
 
-async function backendFetch(path, options = {}) {
+async function apiFetch(path, options = {}) {
   if (!isOnline()) {
     throw new Error("Offline");
   }
 
-  const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       ...getRemoteAuthHeaders(),
@@ -39,73 +39,73 @@ async function backendFetch(path, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(body?.message || response.statusText || "Backend request failed");
+    throw new Error(body?.message || response.statusText || "API request failed");
   }
 
   return body;
 }
 
 async function remoteRegister(username, password, role = "user") {
-  return backendFetch("/auth/register", {
+  return apiFetch("/auth/register", {
     method: "POST",
     body: JSON.stringify({ username, password, role }),
   });
 }
 
 async function remoteLogin(username, password) {
-  return backendFetch("/auth/login", {
+  return apiFetch("/auth/login", {
     method: "POST",
     body: JSON.stringify({ username, password }),
   });
 }
 
 async function remoteGetMe() {
-  return backendFetch("/auth/me");
+  return apiFetch("/auth/me");
 }
 
 async function remoteFetchTopics() {
-  return backendFetch("/topics");
+  return apiFetch("/topics");
 }
 
 async function remoteFetchSlides(topic) {
   const query = topic ? `?topic=${encodeURIComponent(topic)}` : "";
-  return backendFetch(`/slides${query}`);
+  return apiFetch(`/slides${query}`);
 }
 
 async function remoteCreateTopic(name) {
-  return backendFetch("/topics", {
+  return apiFetch("/topics", {
     method: "POST",
     body: JSON.stringify({ name }),
   });
 }
 
 async function remoteCreateSlide(slide) {
-  return backendFetch("/slides", {
+  return apiFetch("/slides", {
     method: "POST",
     body: JSON.stringify(slide),
   });
 }
 
 async function remoteDeleteTopic(name) {
-  return backendFetch(`/topics/${encodeURIComponent(name)}`, {
+  return apiFetch(`/topics/${encodeURIComponent(name)}`, {
     method: "DELETE",
   });
 }
 
 async function remoteDeleteSlidesByTopic(name) {
-  return backendFetch(`/topics/${encodeURIComponent(name)}/slides`, {
+  return apiFetch(`/topics/${encodeURIComponent(name)}/slides`, {
     method: "DELETE",
   });
 }
 
 async function remoteDeleteSlide(id) {
-  return backendFetch(`/slides/${id}`, {
+  return apiFetch(`/slides/${id}`, {
     method: "DELETE",
   });
 }
 
 async function remoteDeleteAll() {
-  return backendFetch("/all", {
+  return apiFetch("/all", {
     method: "DELETE",
   });
 }
