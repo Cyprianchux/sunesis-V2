@@ -4,6 +4,8 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
+const { default: serverless } = require("serverless-http");
+import serverless from "serverless-http";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -306,3 +308,5 @@ app.delete("/all", authenticate, async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Sunesis API listening on port ${PORT}`);
 });
+
+export default serverless(app);
