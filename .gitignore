@@ -1,4 +1,4 @@
-backend/node_modules
-backend/.env
+api/node_modules
+api/.env
 
 rls.sql
