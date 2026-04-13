@@ -4,7 +4,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
-const { default: serverless } = require("serverless-http");
+// const { default: serverless } = require("serverless-http");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;

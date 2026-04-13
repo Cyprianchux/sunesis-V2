@@ -1,4 +1,4 @@
-const API_BASE_URL = window.SUNESIS_API_URL || "http://localhost:3000";
+const API_BASE_URL = window.SUPABASE_URL || "http://localhost:3000";
 
 function isOnline() {
   return window.navigator.onLine;
