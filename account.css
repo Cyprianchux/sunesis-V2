@@ -61,7 +61,7 @@ body {
   color: firebrick;
   border: 1px solid firebrick;
 }
-
+/*
 .back-btn {
   background: none;
   border: 2px solid floralwhite;
@@ -90,6 +90,7 @@ body {
     left: 20px;
   }
 }
+*/
 
 @media (max-width: 600px) {
   .topics-container {
