@@ -71,8 +71,6 @@
                 logout();
                 return false;
               "
-              data-tooltip="Back to Home Page"
-              aria-label="Back to Home Page"
               >Logout</a
             >
           </li>
@@ -95,27 +93,5 @@
 
     <script src="backend-client.js"></script>
     <script src="sunesis.js"></script>
-    <script>
-      const topicsMenu = document.getElementById("topicsMenu");
-      const topicsDropdown = document.querySelector(".topics-dropdown");
-      if (topicsMenu && topicsDropdown) {
-        // Toggle dropdown when clicking "Topics"
-        topicsMenu.addEventListener("click", (e) => {
-          e.stopPropagation();
-          topicsDropdown.style.display =
-            topicsDropdown.style.display === "block" ? "none" : "block";
-        });
-
-        // Prevent clicks inside dropdown from closing it
-        topicsDropdown.addEventListener("click", (e) => {
-          e.stopPropagation();
-        });
-
-        // Close only when clicking truly outside
-        document.addEventListener("click", () => {
-          topicsDropdown.style.display = "none";
-        });
-      }
-    </script>
   </body>
 </html>

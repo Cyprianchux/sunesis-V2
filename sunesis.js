@@ -1,3 +1,26 @@
+/* Topics dropdown logic */
+const topicsMenu = document.getElementById("topicsMenu");
+const topicsDropdown = document.querySelector(".topics-dropdown");
+if (topicsMenu && topicsDropdown) {
+  // Toggle dropdown when clicking "Topics"
+  topicsMenu.addEventListener("click", (e) => {
+    e.stopPropagation();
+    topicsDropdown.style.display =
+      topicsDropdown.style.display === "block" ? "none" : "block";
+  });
+
+  // Prevent clicks inside dropdown from closing it
+  topicsDropdown.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+
+  // Close only when clicking truly outside
+  document.addEventListener("click", () => {
+    topicsDropdown.style.display = "none";
+  });
+}
+
+
 /* ---------- AUTH GUARD ---------- */
 function getActiveUser() {
   const sessionUser = sessionStorage.getItem("sunesis_user");
@@ -1206,6 +1229,7 @@ function logout() {
   sessionStorage.clear();
   localStorage.removeItem("sunesis_remember");
   localStorage.removeItem("sunesis_user");
+  localStorage.removeItem("sunesisBoard");
   window.location.href = "index.html";
 }
 
