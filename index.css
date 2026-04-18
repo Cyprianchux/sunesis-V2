@@ -321,9 +321,9 @@ footer {
 }
 
 .footer-col h4 {
-  margin-bottom: 0.8rem;
-  color: #ffdcdc;
-  font-size: 1.05rem;
+  margin-bottom: 0.6rem;
+  color: #ffb3b3;
+  font-size: 1rem;
 }
 
 .footer-col a {
@@ -331,12 +331,12 @@ footer {
   margin-bottom: 0.5rem;
   color: floralwhite;
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   transition: 0.2s;
 }
 
 .footer-col a:hover {
-  color: #ffb3b3;
+  color: #fdd5d5;
   transform: translateX(4px);
 }
 
