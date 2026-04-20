@@ -1,9 +1,6 @@
-// To run this file using node testSupabase.js, add "type": "module" to package.json and ensure you have the @supabase/supabase-js package installed.
 
-import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
-
-dotenv.config();
+const { createClient } = require("@supabase/supabase-js");
+require("dotenv").config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 

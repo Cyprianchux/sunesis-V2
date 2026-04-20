@@ -1,49 +1,95 @@
-const API_BASE_URL = window.SUPABASE_URL || "http://localhost:3000";
+/* ----
+   Sunesis API Client (Production Ready)
+   Works on:
+   - Localhost (Express running on http://localhost:3000)
+   - Vercel (Serverless functions under /api)
+ */
 
+/**
+ * API base URL logic:
+ * - Local development: backend runs on http://localhost:3000
+ * - Production (Vercel): backend runs on same domain, under /api
+ */
+const API_ORIGIN =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "";
+
+/**
+ * All backend routes are served under /api on Vercel
+ * Locally, you can still keep /api if your backend is also configured that way.
+ */
+const API_BASE_URL = `${API_ORIGIN}/api`;
+
+/**
+ * Check if browser is online
+ */
 function isOnline() {
-  return window.navigator.onLine;
+  return navigator.onLine;
 }
 
-function getRemoteAuthToken() {
-  return sessionStorage.getItem("sunesis_token") || localStorage.getItem("sunesis_token");
+/**
+ * Get token stored in sessionStorage or localStorage
+ */
+function getAuthToken() {
+  return (
+    sessionStorage.getItem("sunesis_token") ||
+    localStorage.getItem("sunesis_token") ||
+    null
+  );
 }
 
-function getRemoteAuthHeaders() {
-  const token = getRemoteAuthToken();
-  const headers = { "Content-Type": "application/json" };
+/**
+ * Build headers for authenticated requests
+ */
+function getAuthHeaders(extraHeaders = {}) {
+  const token = getAuthToken();
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...extraHeaders,
+  };
+
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
+
   return headers;
 }
 
+/**
+ * Central API Fetch Handler
+ */
 async function apiFetch(path, options = {}) {
   if (!isOnline()) {
-    throw new Error("Offline");
+    throw new Error("You are offline. Please check your internet connection.");
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      ...getRemoteAuthHeaders(),
-      ...(options.headers || {}),
-    },
+  const url = `${API_BASE_URL}${path}`;
+
+  const response = await fetch(url, {
+    method: options.method || "GET",
+    headers: getAuthHeaders(options.headers || {}),
+    body: options.body || null,
   });
 
+  let data = null;
   const text = await response.text();
-  let body = null;
+
   try {
-    body = text ? JSON.parse(text) : null;
-  } catch (error) {
-    body = { message: text };
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = { message: text };
   }
 
   if (!response.ok) {
-    throw new Error(body?.message || response.statusText || "API request failed");
+    throw new Error(data?.message || response.statusText || "Request failed");
   }
 
-  return body;
+  return data;
 }
+
+// AUTH API
 
 async function remoteRegister(username, password, role = "user") {
   return apiFetch("/auth/register", {
@@ -63,13 +109,10 @@ async function remoteGetMe() {
   return apiFetch("/auth/me");
 }
 
+// TOPICS API
+
 async function remoteFetchTopics() {
   return apiFetch("/topics");
-}
-
-async function remoteFetchSlides(topic) {
-  const query = topic ? `?topic=${encodeURIComponent(topic)}` : "";
-  return apiFetch(`/slides${query}`);
 }
 
 async function remoteCreateTopic(name) {
@@ -79,6 +122,19 @@ async function remoteCreateTopic(name) {
   });
 }
 
+async function remoteDeleteTopic(name) {
+  return apiFetch(`/topics/${encodeURIComponent(name)}`, {
+    method: "DELETE",
+  });
+}
+
+// SLIDES API
+
+async function remoteFetchSlides(topic = "") {
+  const query = topic ? `?topic=${encodeURIComponent(topic)}` : "";
+  return apiFetch(`/slides${query}`);
+}
+
 async function remoteCreateSlide(slide) {
   return apiFetch("/slides", {
     method: "POST",
@@ -86,23 +142,19 @@ async function remoteCreateSlide(slide) {
   });
 }
 
-async function remoteDeleteTopic(name) {
-  return apiFetch(`/topics/${encodeURIComponent(name)}`, {
-    method: "DELETE",
-  });
-}
-
-async function remoteDeleteSlidesByTopic(name) {
-  return apiFetch(`/topics/${encodeURIComponent(name)}/slides`, {
-    method: "DELETE",
-  });
-}
-
 async function remoteDeleteSlide(id) {
-  return apiFetch(`/slides/${id}`, {
+  return apiFetch(`/slides/${encodeURIComponent(id)}`, {
     method: "DELETE",
   });
 }
+
+async function remoteDeleteSlidesByTopic(topicName) {
+  return apiFetch(`/topics/${encodeURIComponent(topicName)}/slides`, {
+    method: "DELETE",
+  });
+}
+
+// ADMIN API
 
 async function remoteDeleteAll() {
   return apiFetch("/all", {
@@ -110,31 +162,90 @@ async function remoteDeleteAll() {
   });
 }
 
+//  SESSION MANAGEMENT
+
+/**
+ * Save session in sessionStorage always
+ * Save session in localStorage if remember = true
+ */
 function saveRemoteSession(user, token, remember = false) {
+  // Always store in sessionStorage
+  sessionStorage.setItem("sunesis_token", token);
+  sessionStorage.setItem("sunesis_user", user.username);
+  sessionStorage.setItem("sunesis_role", user.role);
+  sessionStorage.setItem("sunesis_logged_in", "true");
+
+  // Optionally store in localStorage
   if (remember) {
     localStorage.setItem("sunesis_token", token);
     localStorage.setItem("sunesis_user", user.username);
     localStorage.setItem("sunesis_role", user.role);
     localStorage.setItem("sunesis_logged_in", "true");
   }
-
-  sessionStorage.setItem("sunesis_token", token);
-  sessionStorage.setItem("sunesis_user", user.username);
-  sessionStorage.setItem("sunesis_role", user.role);
-  sessionStorage.setItem("sunesis_logged_in", "true");
 }
 
+/**
+ * Clears all stored session values
+ */
 function clearRemoteSession() {
   sessionStorage.removeItem("sunesis_token");
+  sessionStorage.removeItem("sunesis_user");
   sessionStorage.removeItem("sunesis_role");
+  sessionStorage.removeItem("sunesis_logged_in");
+
   localStorage.removeItem("sunesis_token");
+  localStorage.removeItem("sunesis_user");
   localStorage.removeItem("sunesis_role");
+  localStorage.removeItem("sunesis_logged_in");
 }
 
+/**
+ * Returns currently logged in username
+ */
+function getRemoteUsername() {
+  return (
+    sessionStorage.getItem("sunesis_user") ||
+    localStorage.getItem("sunesis_user") ||
+    null
+  );
+}
+
+/**
+ * Returns user role
+ */
 function getRemoteUserRole() {
-  return sessionStorage.getItem("sunesis_role") || localStorage.getItem("sunesis_role") || "user";
+  return (
+    sessionStorage.getItem("sunesis_role") ||
+    localStorage.getItem("sunesis_role") ||
+    "user"
+  );
 }
 
+/**
+ * Check if user is admin
+ */
 function isRemoteAdmin() {
   return getRemoteUserRole() === "sunesis_admin";
+}
+
+/**
+ * Check if user is logged in
+ */
+function isRemoteLoggedIn() {
+  return (
+    sessionStorage.getItem("sunesis_logged_in") === "true" ||
+    localStorage.getItem("sunesis_logged_in") === "true"
+  );
+}
+
+// OPTIONAL: AUTO LOGOUT IF TOKEN INVALID
+
+async function validateSessionOrLogout() {
+  try {
+    const me = await remoteGetMe();
+    return me;
+  } catch (err) {
+    clearRemoteSession();
+    throw err;
+  }
 }

@@ -1,18 +1,18 @@
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
-// const { default: serverless } = require("serverless-http");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 const JWT_SECRET = process.env.JWT_SECRET;
-const PORT = process.env.PORT || 3000;
+// const PORT = process.env.PORT || 3000;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment.");
+  console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY in environment.");
   process.exit(1);
 }
 
@@ -59,6 +59,8 @@ async function getUserByUsername(username) {
 
   return data;
 }
+
+// Auth routes
 
 app.post("/auth/register", async (req, res) => {
   const { username, password, role = "user" } = req.body;
@@ -113,6 +115,8 @@ app.post("/auth/login", async (req, res) => {
 app.get("/auth/me", authenticate, async (req, res) => {
   return res.json({ user: req.user });
 });
+
+// Topics routes
 
 app.get("/topics", authenticate, async (req, res) => {
   const { data, error } = await supabase.from("topics").select("name, creator, created_at");
@@ -179,6 +183,8 @@ app.delete("/topics/:name", authenticate, async (req, res) => {
   return res.json({ message: "Topic deleted." });
 });
 
+// Slides routes
+
 app.get("/slides", authenticate, async (req, res) => {
   let query = supabase.from("slides").select("id, topic, title, description, media, type, creator, created_at");
   if (req.query.topic) {
@@ -229,7 +235,7 @@ app.post("/slides", authenticate, async (req, res) => {
 });
 
 app.delete("/slides/:id", authenticate, async (req, res) => {
-  const slideId = Number(req.params.id);
+  const slideId = req.params.id;
   const { data: slide, error: slideError } = await supabase
     .from("slides")
     .select("id, creator")
@@ -303,9 +309,9 @@ app.delete("/all", authenticate, async (req, res) => {
 
   return res.json({ message: "All topics and slides deleted." });
 });
-
+/*
 app.listen(PORT, () => {
   console.log(`Sunesis API listening on port ${PORT}`);
-});
+}); */
 
-// export default serverless(app);
+module.exports = app;
