@@ -171,8 +171,8 @@ button:active {
 .nav-links a[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
-  top: calc(50% + 12px);
-  left: 50%;
+  top: calc(120% + 8px);
+  left: 20%;
   transform: translateX(-30%);
   white-space: nowrap;
   background: firebrick;
@@ -186,12 +186,12 @@ button:active {
   z-index: 10;
   transition: opacity 0.2s ease, visibility 0.2s ease;
 }
-
+/*
 .nav-links a[data-tooltip]::before {
   content: "";
   position: absolute;
-  top: 55%;
-  left:50%;
+  top: 115%;
+  left:5%;
   transform: translateX(45%);
   border: 8px solid transparent;
   border-top-color: firebrick;
@@ -199,6 +199,7 @@ button:active {
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;
 }
+*/
 
 .nav-links a[data-tooltip]:hover::after,
 .nav-links a[data-tooltip]:hover::before {
