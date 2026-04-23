@@ -1,4 +1,7 @@
 /* Shared CSS properties */
+* {
+  box-sizing: border-box;
+}
 
 /* Body padding for pages with top-banner */
 body {
@@ -9,7 +12,7 @@ body {
 /* Top banner */
 .top-banner {
   display: grid;
-  grid-template-columns: 250px 1fr 2fr;
+  grid-template-columns: 250px 1fr 1.5fr;
   position: fixed;
   top: 0;
   left: 0;
@@ -25,7 +28,6 @@ body {
   padding-bottom: 0px;
   height: 70px;
   display: flex;
-
   align-items: center;
   padding-left: 10px;
   min-width: 0;
@@ -49,47 +51,51 @@ body {
 
 .top-left h1 {
   color: #0b1f6d;
-  font-size: clamp(1.8rem, 3.5vw, 38px);
+  font-size: clamp(1.6rem, 3.5vw, 38px);
   font-weight: bold;
   margin: 0;
   white-space: nowrap;
 }
 
 .search-bar {
-  padding: 17px 5px;
-  margin: auto;
-  display: flex;
+  position: relative;
   max-width: 400px;
+  margin: auto;
+  margin-right: 1rem;
 }
 
 .search-bar input {
+  width: 100%;
+  height: 38px;
   font-size: clamp(14px, 2vw, 16px);
-  width: 80%;
-  border-radius: 5px 0 0 5px;
+  border-radius: 6px;
   border: 1px solid firebrick;
-  height: 34px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
   background: floralwhite;
   padding-left: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  outline: none;
 }
 
 .search-bar button {
-  padding: 0px 6px;
-  cursor: pointer;
-  background: floralwhite;
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  height: 28px;
+  width: 28px;
+  border: none;
+  background: transparent;
   color: firebrick;
-  border-radius: 0 5px 5px 0;
-  transition: background 0.3s;
-  border: 1px solid firebrick;
-  border-left: none;
-  height: 37.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: clamp(14px, 2vw, 16px);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 }
 
 .search-bar button:hover {
-  background: firebrick;
-  box-shadow: none;
+  background: transparent ;
+  color: firebrick;
 }
 
 button {
@@ -171,11 +177,11 @@ button:active {
 .nav-links a[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
-  top: calc(120% + 8px);
+  top: calc(120% + 19.5px);
   left: 20%;
   transform: translateX(-30%);
   white-space: nowrap;
-  background: rgba(178, 34, 34, 0.4);
+  background: rgba(178, 34, 34, 0.6);
   color: #fff;
   padding: 6px 10px;
   border-radius: 4px;
