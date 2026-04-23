@@ -175,7 +175,7 @@ button:active {
   left: 20%;
   transform: translateX(-30%);
   white-space: nowrap;
-  background: firebrick;
+  background: rgba(178, 34, 34, 0.4);
   color: #fff;
   padding: 6px 10px;
   border-radius: 4px;
