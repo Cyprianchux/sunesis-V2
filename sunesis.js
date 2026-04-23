@@ -58,16 +58,6 @@ async function getTopicByName(name) {
   });
 }
 
-async function getSlideById(id) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction("slides", "readonly");
-    const store = tx.objectStore("slides");
-    const request = store.get(Number(id));
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
 async function getAdminPageTopics() {
   const topics = await getAllTopics();
   if (isAdminUser()) return topics;
@@ -197,6 +187,11 @@ function getTopicByNameLocal(name) {
 
 function getSlideById(id) {
   return new Promise((resolve, reject) => {
+    if (!db) {
+      reject(new Error("Database not initialized. Call initDB() first."));
+      return;
+    }
+
     const tx = db.transaction("slides", "readonly");
     const store = tx.objectStore("slides");
     const request = store.get(Number(id));
@@ -309,6 +304,7 @@ async function syncRemoteToLocal() {
 }
 
 async function syncAllRemoteData() {
+  if (!db) await initDB(); 
   if (!isOnline()) return;
   await syncLocalToRemote();
   await syncRemoteToLocal();
@@ -1374,4 +1370,8 @@ function showConfirm(message) {
 // Function to clear inputs
 function clearInputs(...inputs) {
   inputs.forEach(input => input.value = "");
+}
+
+function isOnline() {
+  return navigator.onLine;
 }
