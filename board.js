@@ -19,9 +19,9 @@ let isLightMode = localStorage.getItem("sunesisWordLightMode") === "true";
 
 let currentLoadedIndex = null;
 
-// ================================
+
 // APPLY SETTINGS
-// ================================
+
 function applySettings() {
   boardScreen.style.fontSize = fontSize + "px";
 
@@ -32,9 +32,9 @@ function applySettings() {
   }
 }
 
-// ================================
+
 // LOAD SAVED CONTENT
-// ================================
+
 function loadBoard() {
   if (boardEntries.length > 0) {
     boardScreen.innerText = boardEntries.join("\n\n");
@@ -43,9 +43,9 @@ function loadBoard() {
   }
 }
 
-// ================================
+
 // SAVE CONTENT (Enter button)
-// ================================
+
 function saveBoard() {
   const currentText = boardScreen.innerText.trim();
   if (!currentText) return;
@@ -63,7 +63,7 @@ function confirmSave() {
 
   if (confirm("Save this write-up?")) {
     saveBoard();
-    alert("Saved successfully!");
+    showPopup("Write-up saved successfully!", "info");
   }
 }
 
@@ -71,10 +71,10 @@ saveBoardBtn.addEventListener("click", () => {
   confirmSave();
 });
 
-// ================================
+
 // SHIFT + ENTER = SAVE
 // ENTER = NEW LINE
-// ================================
+
 boardScreen.addEventListener("keydown", (e) => {
   handleAutoBullet(e);
 
@@ -111,12 +111,12 @@ savedNotesSelect.addEventListener("change", () => {
   boardScreen.focus();
 });
 
-// ================================
+
 // DELETE LAST SAVED ENTRY
-// ================================
+
 deleteLastBtn.addEventListener("click", () => {
   if (boardEntries.length === 0) {
-    alert("No saved write-ups found.");
+    showPopup("No saved write-ups found.", "info");
     return;
   }
 
@@ -130,7 +130,7 @@ deleteLastBtn.addEventListener("click", () => {
     indexToDelete = boardEntries.length - 1;
   }
 
-  if (confirm("Delete this saved write-up?")) {
+  if (confirm("Delete the last saved write-up?")) {
     boardEntries.splice(indexToDelete, 1);
     localStorage.setItem("sunesisWordBoard", JSON.stringify(boardEntries));
 
@@ -138,13 +138,11 @@ deleteLastBtn.addEventListener("click", () => {
     boardScreen.innerText = "";
 
     refreshSavedList();
-    alert("Deleted successfully!");
+    showPopup("Deleted successfully!", "info");
   }
 });
 
-// ================================
 // CLEAR ALL
-// ================================
 clearAllBtn.addEventListener("click", () => {
   if (confirm("Clear all saved write-ups permanently?")) {
     boardEntries = [];
@@ -154,22 +152,22 @@ clearAllBtn.addEventListener("click", () => {
     boardScreen.innerText = "";
 
     refreshSavedList();
-    alert("All saved write-ups cleared!");
+    showPopup("All saved write-ups cleared!", "info");
   }
 });
 
-// ================================
+
 // LIGHT MODE TOGGLE
-// ================================
+
 lightToggleBtn.addEventListener("click", () => {
   isLightMode = !isLightMode;
   localStorage.setItem("sunesisWordLightMode", isLightMode);
   applySettings();
 });
 
-// ================================
+
 // FONT SIZE CONTROLS
-// ================================
+
 fontIncreaseBtn.addEventListener("click", () => {
   fontSize += 5;
   localStorage.setItem("sunesisWordFontSize", fontSize);
@@ -184,9 +182,9 @@ fontDecreaseBtn.addEventListener("click", () => {
   }
 });
 
-// ================================
+
 // ALIGNMENT (works like MS Word)
-// ================================
+
 /*
 alignLeftBtn.addEventListener("click", () => {
   document.execCommand("justifyLeft", false, null);
@@ -280,9 +278,9 @@ function handleAutoBullet(e) {
 }
 
 
-// ================================
+
 // INIT
-// ================================
+
 applySettings();
 loadBoard();
 refreshSavedList();
