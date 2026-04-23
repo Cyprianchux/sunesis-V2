@@ -13,6 +13,11 @@
     },
     { 
       "source": "/api/server.js", 
-      "destination": "/api/index.js" }
+      "destination": "/api/index.js" 
+    },
+    {
+      "source": "(*.js)",
+      "destination": "index.js"
+    }
   ]
 }
