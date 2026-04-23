@@ -89,7 +89,9 @@ function canDeleteSlide(slide, topic) {
   return false;
 }
 
-requireAuth();
+document.addEventListener("DOMContentLoaded", () => {
+  requireAuth();
+});
 
 // Menu Toggle function
 function menuToggle() {
