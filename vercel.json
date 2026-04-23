@@ -16,7 +16,7 @@
       "destination": "/api/index.js" 
     },
     {
-      "source": "(*.js)",
+      "source": "*.js",
       "destination": "index.js"
     }
   ]
