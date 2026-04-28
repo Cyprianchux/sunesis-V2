@@ -43,8 +43,9 @@ body {
 .header-img {
   flex: 1;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
+  justify-content: center;
 }
 
 /* Media sizing */

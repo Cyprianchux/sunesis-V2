@@ -1105,7 +1105,7 @@ function displayFilteredAdminSlides(filteredSlides) {
   container.innerHTML = filteredSlides
     .map(
       (s) => `
-      <div class="slide-item" style="margin:8px;padding:8px;border:1px solid #ccc;border-radius:8px;">
+      <div class="slide-item">
         <h4>${s.title}</h4>
         <div class="slide-desc">
           ${formatDescription(s.desc)}
