@@ -40,6 +40,10 @@ function requireAuth(redirectUrl = "index.html") {
   }
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  requireAuth();
+});
+
 function isAdminUser(user = getActiveUser()) {
   const users = JSON.parse(localStorage.getItem("sunesis_users")) || {};
   const localRole = users[user]?.role;
@@ -88,10 +92,6 @@ function canDeleteSlide(slide, topic) {
   if (!slide?.creator && topic?.creator === activeUser) return true;
   return false;
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  requireAuth();
-});
 
 // Menu Toggle function
 function menuToggle() {
@@ -502,7 +502,7 @@ async function deleteTopicHandler(topicName) {
 
   showPopup(`Topic "${topicName}" and all its slides deleted.`, "success");
 }
-
+/*
 async function loadTopicsAdmin() {
   const topics = await getAdminPageTopics();
   const select = document.getElementById("topicSelect");
@@ -514,7 +514,34 @@ async function loadTopicsAdmin() {
     select.appendChild(opt);
   });
 }
+*/
+// Load topics into both dropdown on admin page
+async function loadTopicsAdmin() {
+  const topics = await getAdminPageTopics();
 
+  const select = document.getElementById("topicSelect"); // Add Slide select
+  const navSelect = document.getElementById("navTopicSelect"); // Navbar select
+
+  if (select) {
+    select.innerHTML = `<option value="">-- Choose a topic --</option>`;
+    topics.forEach((topic) => {
+      const opt = document.createElement("option");
+      opt.value = topic.name;
+      opt.textContent = topic.name;
+      select.appendChild(opt);
+    });
+  }
+
+  if (navSelect) {
+    navSelect.innerHTML = `<option value="">Choose a topic</option>`;
+    topics.forEach((topic) => {
+      const opt = document.createElement("option");
+      opt.value = topic.name;
+      opt.textContent = topic.name;
+      navSelect.appendChild(opt);
+    });
+  }
+}
 // Display All Topics
 
 async function displayAllTopics() {
