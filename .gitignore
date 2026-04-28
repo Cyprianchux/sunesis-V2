@@ -1,6 +1,11 @@
 api/node_modules
 api/.env
 
-rls.sql
-.vercel
 .env*.local
+
+node_modules
+.vercel
+.vscode
+.extensions
+
+
