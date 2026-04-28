@@ -8,7 +8,7 @@ async function testConnection() {
   const { data, error } = await supabase.from("users").select("*").limit(1);
 
   if (error) {
-    console.log("❌ Error:", error.message);
+    console.log("❌ Connection failed:", error.message);
   } else {
     console.log("✅ Supabase connection successful!");
     console.log(data);
