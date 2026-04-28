@@ -7,12 +7,12 @@ const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const JWT_SECRET = process.env.JWT_SECRET;
-// const PORT = process.env.PORT || 3000;
+// const PORT = process.env.PORT;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY in environment.");
+  console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment.");
   process.exit(1);
 }
 
@@ -312,6 +312,6 @@ app.delete("/all", authenticate, async (req, res) => {
 /*
 app.listen(PORT, () => {
   console.log(`Sunesis API listening on port ${PORT}`);
-}); */
-
+}); 
+*/
 module.exports = app;

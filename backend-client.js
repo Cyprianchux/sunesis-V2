@@ -1,19 +1,22 @@
 /* ----
    Sunesis API Client (Production Ready)
    Works on:
-   - Localhost (Express running on http://localhost:3000)
+   - Localhost (Express running on http://localhost:5500)
    - Vercel (Serverless functions under /api)
  */
 
 /**
  * API base URL logic:
- * - Local development: backend runs on http://localhost:3000
+ * - Local development: backend runs on http://localhost:5500
  * - Production (Vercel): backend runs on same domain, under /api
  */
+const local_origin = "http://localhost:5500";
+const remote_origin = "https://sunesis.vercel.app";
+
 const API_ORIGIN =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "";
+   window.location.hostname === "localhost"
+     ? local_origin
+     : remote_origin;
 
 /**
  * All backend routes are served under /api on Vercel
