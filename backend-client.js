@@ -141,7 +141,13 @@ async function remoteFetchSlides(topic = "") {
 async function remoteCreateSlide(slide) {
   return apiFetch("/slides", {
     method: "POST",
-    body: JSON.stringify(slide),
+    body: JSON.stringify({
+      topic: slide.topic,
+      title: slide.title,
+      description: slide.desc || slide.description || "",
+      media: slide.media,
+      type: slide.type,
+    }),
   });
 }
 
