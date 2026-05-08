@@ -8,12 +8,12 @@
   ],
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
       "source": "/:path",
       "destination": "/:path.html"
-    },
-    { 
-      "source": "/api/server.js", 
-      "destination": "/api/index.js" 
     }
   ]
 }
