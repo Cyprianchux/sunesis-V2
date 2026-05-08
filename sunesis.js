@@ -111,13 +111,14 @@ let selectedTopic = null;
 let allSlidesCache = [];
 
 // Detect page type
-const isAdminPage = window.location.pathname.includes("slide-admin.html");
+const pathname = window.location.pathname;
+const isAdminPage = pathname.includes("slide-admin") || pathname.includes("slide-admin.html");
 
-const isViewPage = window.location.pathname.includes("slide-view.html");
+const isViewPage = pathname.includes("slide-view") || pathname.includes("slide-view.html");
 
-const isAccountPage = window.location.pathname.includes("account.html");
+const isAccountPage = pathname.includes("account") || pathname.includes("account.html");
 
-const isWebPage = window.location.pathname.includes("web-view.html");
+const isWebPage = pathname.includes("web-view") || pathname.includes("web-view.html");
 
 // INITIALIZE DATABASE
 
