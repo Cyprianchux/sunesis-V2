@@ -1,11 +1,11 @@
 {
   "name": "sunesis-v2-backend",
   "version": "1.0.0",
-  "main": "api/index.js",
+  "main": "server.js",
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "dev": "node api/index.js"
+    "dev": "node server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
