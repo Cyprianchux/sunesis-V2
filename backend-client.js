@@ -247,7 +247,7 @@ function isRemoteLoggedIn() {
   );
 }
 
-// OPTIONAL: AUTO LOGOUT IF TOKEN INVALID
+// OPTIONAL: Auto logout if session is invalid (e.g. token expired)
 
 async function validateSessionOrLogout() {
   try {
