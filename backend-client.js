@@ -18,10 +18,7 @@ const API_ORIGIN =
      ? local_origin
      : remote_origin;
 
-/**
- * All backend routes are served under /api on Vercel
- * Locally, you can still keep /api if your backend is also configured that way.
- */
+
 const API_BASE_URL = `${API_ORIGIN}/api`;
 
 /**
