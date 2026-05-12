@@ -28,9 +28,8 @@ function isOnline() {
   return navigator.onLine;
 }
 
-/**
- * Get token stored in sessionStorage or localStorage
- */
+// Get token stored in sessionStorage or localStorage
+
 function getAuthToken() {
   return (
     sessionStorage.getItem("sunesis_token") ||
