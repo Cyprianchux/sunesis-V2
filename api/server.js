@@ -16,6 +16,11 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   process.exit(1);
 }
 
+if (!JWT_SECRET) {
+  console.error("Missing JWT_SECRET in environment.");
+  process.exit(1);
+}
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = express();
 app.use(cors());
