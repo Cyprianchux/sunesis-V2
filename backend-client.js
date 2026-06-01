@@ -10,9 +10,24 @@
  * - Local development: use the local backend when running on localhost.
  * - Production: use the current origin so deployed domains work without hardcoding.
  */
-const API_BASE_URL = window.location.hostname === "localhost"
-  ? "http://localhost:5500/api"
-  : "/api";
+// Derive API base URL dynamically so it works on localhost, file:// pages,
+// and deployed origins without hardcoding domain names.
+const API_BASE_URL = (function () {
+  // When running from the filesystem (file://) default to localhost backend
+  if (window.location.protocol === "file:") {
+    return "http://localhost:5500/api";
+  }
+
+  // If running on common local hostnames, point to local backend with port
+  const host = window.location.hostname;
+  if (host === "localhost" || host === "127.0.0.1") {
+    return "http://localhost:5500/api";
+  }
+
+  // Otherwise use the current origin so deployed domains (Vercel, Netlify, etc.)
+  // resolve the API relative to the site origin.
+  return window.location.origin.replace(/\/$/, "") + "/api";
+})();
 
 /**
  * Check if browser is online
@@ -54,16 +69,25 @@ function getAuthHeaders(extraHeaders = {}) {
  */
 async function apiFetch(path, options = {}) {
   if (!isOnline()) {
-    throw new Error("You are offline. Please check your internet connection.");
+    throw new Error("Offline");
   }
 
   const url = `${API_BASE_URL}${path}`;
 
-  const response = await fetch(url, {
-    method: options.method || "GET",
-    headers: getAuthHeaders(options.headers || {}),
-    body: options.body || null,
-  });
+  let response;
+  try {
+    response = await fetch(url, {
+      method: options.method || "GET",
+      headers: getAuthHeaders(options.headers || {}),
+      body: options.body || null,
+      // allow CORS when needed and use same-origin credentials by default
+      mode: "cors",
+      credentials: "same-origin",
+    });
+  } catch (err) {
+    // Network-level errors (DNS, refused connection, etc.)
+    throw new Error(`Network error: ${err.message}`);
+  }
 
   let data = null;
   const text = await response.text();
@@ -75,7 +99,8 @@ async function apiFetch(path, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(data?.message || response.statusText || "Request failed");
+    const errMsg = data?.message || response.statusText || "Request failed";
+    throw new Error(errMsg);
   }
 
   return data;
@@ -91,10 +116,16 @@ async function remoteRegister(username, password, role = "user") {
 }
 
 async function remoteLogin(username, password) {
-  return apiFetch("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ username, password }),
-  });
+  try {
+    return await apiFetch("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+  } catch (err) {
+    // Re-throw so callers can handle remote vs offline cases
+    throw err;
+  }
 }
 
 async function remoteGetMe() {
