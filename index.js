@@ -80,6 +80,23 @@ function resetValidationColors(prefix) {
 }
 
 // Reset all validation colors for both register and login
+const LOCAL_ONLY_MODE_KEY = "sunesis_local_only_mode";
+
+function setLocalOnlyMode(enabled) {
+  if (enabled) {
+    localStorage.setItem(LOCAL_ONLY_MODE_KEY, "true");
+    sessionStorage.setItem(LOCAL_ONLY_MODE_KEY, "true");
+  } else {
+    localStorage.removeItem(LOCAL_ONLY_MODE_KEY);
+    sessionStorage.removeItem(LOCAL_ONLY_MODE_KEY);
+  }
+}
+
+function warnLocalOnlyMode(message) {
+  setLocalOnlyMode(true);
+  showPopup(message, "info");
+}
+
 async function saveLocalUser(username, password, role) {
   const users = JSON.parse(localStorage.getItem("sunesis_users")) || {};
   users[username] = {
@@ -157,7 +174,7 @@ async function register() {
   if (isOnline()) {
     try {
       await remoteRegister(username, password, role);
-      await saveLocalUser(username, password, role);
+      setLocalOnlyMode(false);
       showPopup("Registration successful. Please login.", "success");
       clearInputs(regUser, regPass, confirmPass);
       showLogin();
@@ -167,9 +184,8 @@ async function register() {
         showPopup(error.message, "error");
         return;
       }
-      showPopup(
-        "Unable to register online. Saving account locally for offline use.",
-        "info",
+      warnLocalOnlyMode(
+        "Local-only mode active: the account was saved in this browser only and will not sync across devices until the connection returns.",
       );
     }
   }
@@ -187,12 +203,13 @@ async function login() {
 
   const users = JSON.parse(localStorage.getItem("sunesis_users")) || {};
   const hash = await hashPassword(password);
+  let remoteLoginFailed = false;
 
   if (isOnline()) {
     try {
       const response = await remoteLogin(username, password);
       saveRemoteSession(response.user, response.token, rememberMe.checked);
-      await saveLocalUser(username, password, response.user.role);
+      setLocalOnlyMode(false);
       if (rememberMe.checked) {
         localStorage.setItem("sunesis_remember", "true");
         localStorage.setItem("sunesis_user", username);
@@ -207,6 +224,7 @@ async function login() {
       }, 900);
       return;
     } catch (error) {
+      remoteLoginFailed = true;
       if (error.message !== "Offline") {
         showPopup("Backend login failed. Trying offline mode if available.", "info");
       }
@@ -228,6 +246,12 @@ async function login() {
   sessionStorage.setItem("sunesis_logged_in", "true");
   sessionStorage.setItem("sunesis_user", username);
   sessionStorage.setItem("sunesis_role", users[username].role);
+
+  if (remoteLoginFailed) {
+    warnLocalOnlyMode(
+      "Local-only mode active: using this browser's saved account. Changes will not sync across devices until the connection returns.",
+    );
+  }
 
   showPopup("Login successful", "success");
   clearInputs(loginUser, loginPass);

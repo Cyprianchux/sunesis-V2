@@ -7,19 +7,12 @@
 
 /**
  * API base URL logic:
- * - Local development: backend runs on http://localhost:5500
- * - Production (Vercel): backend runs on same domain, under /api
+ * - Local development: use the local backend when running on localhost.
+ * - Production: use the current origin so deployed domains work without hardcoding.
  */
-const local_origin = "http://localhost:5500";
-const remote_origin = "https://sunesis.vercel.app";
-
-const API_ORIGIN =
-   window.location.hostname === "localhost"
-     ? local_origin
-     : remote_origin;
-
-
-const API_BASE_URL = `${API_ORIGIN}/api`;
+const API_BASE_URL = window.location.hostname === "localhost"
+  ? "http://localhost:5500/api"
+  : "/api";
 
 /**
  * Check if browser is online
