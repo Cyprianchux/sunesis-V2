@@ -10,7 +10,7 @@ import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const JWT_SECRET = process.env.JWT_SECRET;
-// const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5500;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment.");
@@ -197,7 +197,7 @@ app.delete("/topics/:name", authenticate, async (req, res) => {
     return res.status(404).json({ message: "Topic not found." });
   }
 
-  const isAdmin = req.user.role === "sunesis_admin";
+  const isAdmin = req.user.role === "Nmenichimso";
 
   if (!isAdmin && existing.creator !== req.user.username) {
     return res.status(403).json({ message: "Forbidden: cannot delete this topic." });
@@ -286,7 +286,7 @@ app.delete("/slides/:id", authenticate, async (req, res) => {
     return res.status(404).json({ message: "Slide not found." });
   }
 
-  const isAdmin = req.user.role === "sunesis_admin";
+  const isAdmin = req.user.role === "Nmenichimso";
 
   if (!isAdmin && slide.creator !== req.user.username) {
     return res.status(403).json({ message: "Forbidden: cannot delete this slide." });
@@ -318,7 +318,7 @@ app.delete("/topics/:name/slides", authenticate, async (req, res) => {
     return res.status(404).json({ message: "Topic not found." });
   }
 
-  const isAdmin = req.user.role === "sunesis_admin";
+  const isAdmin = req.user.role === "Nmenichimso";
 
   if (!isAdmin && topic.creator !== req.user.username) {
     return res.status(403).json({ message: "Forbidden: cannot delete slides for this topic." });
@@ -334,7 +334,7 @@ app.delete("/topics/:name/slides", authenticate, async (req, res) => {
 });
 
 app.delete("/all", authenticate, async (req, res) => {
-  if (req.user.role !== "sunesis_admin") {
+  if (req.user.role !== "Nmenichimso") {
     return res.status(403).json({ message: "Only admin can delete all content." });
   }
 
@@ -352,5 +352,12 @@ app.delete("/all", authenticate, async (req, res) => {
 
   return res.json({ message: "All topics and slides deleted." });
 });
+
+// Start server for local development (not needed for Vercel)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  app.listen(PORT, () => {
+    console.log(`✅ Sunesis API Server running on http://localhost:${PORT}`);
+  });
+}
 
 export default app;
