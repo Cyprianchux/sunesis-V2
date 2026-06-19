@@ -1,0 +1,163 @@
+
+.add-slide {
+  margin-top: 2rem;
+}
+
+.wide-create-topic {
+  display: none;
+}
+
+@media (min-width: 670px) {
+  .create-add-div {
+    display: flex;
+    flex-direction: row-reverse;
+  }
+
+  .wide-create-topic {
+    display: flex;
+    margin-top: 20px;
+    justify-content: center;
+  }
+  .wide-create-topic img {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid lightblue;
+  }
+}
+
+.create-topic h2, .add-slide h2 {
+  margin: 0 auto 10px 10px;
+  color: #0f426b;  
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.slide-list h2 {
+  text-align: center;
+  color: firebrick;
+}
+
+.create-topic input {
+  padding: 5px;
+  font-size: 15px;
+}
+
+.add-slide button {
+  margin-top: 10px;
+  background-color: blanchedalmond;
+  border: 1px solid #145a7d;
+  color: #0f426b;
+}
+
+.add-slide button:hover {
+  background-color: navajowhite;
+  border: 1px solid rgb(47, 168, 243);
+  color: rgb(16, 99, 151);
+}
+
+.add-slide {
+  width: 300px;
+}
+
+section select {
+  padding: 8px;
+  width: 96%;
+}
+
+section select, section textarea, section label { 
+  margin-left: 8px;
+  display: block;
+}
+
+section label {
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+section input, section button {
+  display: block;
+  margin-left: 8px;
+}
+
+textarea {
+  width: 91%;
+  padding: 6px;
+  font-size: 16px;
+}
+
+#slide-media {
+  margin: 0 auto 15px 8px;
+}
+
+.topic-section {
+  margin-bottom: 2rem;
+  padding: 5px 2px;
+  justify-content: center;
+  border: 1.5px solid firebrick;
+  border-right: none;
+  border-left: none;
+  border-radius: 15px;
+  background: #ffebeb;
+}
+
+.topic-section h3 {
+  margin-left: 18px;
+  color: #0f426b;
+}
+
+.topic-section button {
+  display: inline-flex;
+  margin-bottom: 1rem;
+}
+
+.topic-section button:hover {
+  background-color: crimson;
+  color: white;
+  border: 1px solid crimson;
+  transition: 0.5s;
+}
+
+#slideContainer {
+  display: inline-block; 
+}
+
+.slide-item {
+  display: inline-block;
+  vertical-align: top;
+  margin: 8px;
+  padding: 8px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+}
+
+.slide-item h4 {
+  text-align: center;
+  font-size: large;
+}
+
+.slide-item .slide-desc {
+  margin-left: 0;
+}
+
+.slide-item button {
+  display: block;
+  margin-top: 10px;
+}
+
+#deleteAllBtn {
+  display: block;
+  margin: 1rem auto;
+  padding: 0.75rem 1.5rem;
+  background-color: crimson;
+  color: white;
+}
+
+#deleteAllBtn:hover {
+  background-color: white;
+  border: 1px solid crimson;
+  transition: 0.5s;
+  color: crimson;
+}
+
+
+
+
