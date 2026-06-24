@@ -52,6 +52,23 @@ function isAdminUser(user = getActiveUser()) {
   return localRole === "Nmenichimso" || remoteRole === "Nmenichimso";
 }
 
+const LOCAL_ONLY_MODE_KEY = "sunesis_local_only_mode";
+
+function setLocalOnlyMode(enabled) {
+  if (enabled) {
+    localStorage.setItem(LOCAL_ONLY_MODE_KEY, "true");
+    sessionStorage.setItem(LOCAL_ONLY_MODE_KEY, "true");
+  } else {
+    localStorage.removeItem(LOCAL_ONLY_MODE_KEY);
+    sessionStorage.removeItem(LOCAL_ONLY_MODE_KEY);
+  }
+}
+
+function warnLocalOnlyMode(message = "Local-only mode active: this browser is storing the change locally until the connection returns.") {
+  setLocalOnlyMode(true);
+  showPopup(message, "info");
+}
+
 async function getTopicByName(name) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction("topics", "readonly");
@@ -717,6 +734,7 @@ document.addEventListener("DOMContentLoaded", () => {
 if (isViewPage) {
   document.addEventListener("DOMContentLoaded", async () => {
     await initDB();
+    await syncAllRemoteData();
     allSlidesCache = await getAllSlides();
     await loadTopicsView();
     bindTopicSelection();
@@ -800,12 +818,14 @@ if (isViewPage) {
 }
 
 window.addEventListener("online", async () => {
+  setLocalOnlyMode(false);
   showPopup("Connection restored. Syncing online content...", "success");
   await syncAllRemoteData();
 });
 
 window.addEventListener("offline", () => {
-  showPopup("You are offline. Local mode is active.", "info");
+  setLocalOnlyMode(true);
+  showPopup("You are offline. Local-only mode is active. Changes stay in this browser until connectivity returns.", "info");
 });
 
 function displayCurrentSlide() {
@@ -967,9 +987,8 @@ if (isAdminPage) {
                 await saveLocalTopic(topic);
               }
             } else {
-              showPopup(
-                "Topic saved locally and will sync when online.",
-                "info",
+              warnLocalOnlyMode(
+                "Local-only mode active: topic saved only in this browser. It will sync when the connection returns.",
               );
             }
           }
@@ -1016,9 +1035,8 @@ if (isAdminPage) {
                   await saveLocalSlide(localSlide);
                 }
               } catch (error) {
-                showPopup(
-                  "Slide saved locally and will sync when online.",
-                  "info",
+                warnLocalOnlyMode(
+                  "Local-only mode active: slide saved only in this browser. It will sync when the connection returns.",
                 );
               }
             }
@@ -1041,9 +1059,8 @@ if (isAdminPage) {
                 await saveLocalSlide(localSlide);
               }
             } catch (error) {
-              showPopup(
-                "Slide saved locally and will sync when online.",
-                "info",
+              warnLocalOnlyMode(
+                "Local-only mode active: slide saved only in this browser. It will sync when the connection returns.",
               );
             }
           }
