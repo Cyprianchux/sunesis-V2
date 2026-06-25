@@ -12,6 +12,8 @@
  */
 // Derive API base URL dynamically so it works on localhost, file:// pages,
 // and deployed origins without hardcoding domain names.
+const REMOTE_TIMEOUT_MS = 8000;
+
 const API_BASE_URL = (function () {
   // When running from the filesystem (file://) default to localhost backend
   if (window.location.protocol === "file:") {
@@ -73,7 +75,7 @@ async function apiFetch(path, options = {}) {
   }
 
   const url = `${API_BASE_URL}${path}`;
-  const timeoutMs = options.timeoutMs || 20000;
+  const timeoutMs = options.timeoutMs || REMOTE_TIMEOUT_MS;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -122,6 +124,7 @@ async function remoteRegister(username, password, role = "user") {
   return apiFetch("/auth/register", {
     method: "POST",
     body: JSON.stringify({ username, password, role }),
+    timeoutMs: REMOTE_TIMEOUT_MS,
   });
 }
 
@@ -131,6 +134,7 @@ async function remoteLogin(username, password) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
+      timeoutMs: REMOTE_TIMEOUT_MS,
     });
   } catch (err) {
     // Re-throw so callers can handle remote vs offline cases
@@ -139,25 +143,27 @@ async function remoteLogin(username, password) {
 }
 
 async function remoteGetMe() {
-  return apiFetch("/auth/me");
+  return apiFetch("/auth/me", { timeoutMs: REMOTE_TIMEOUT_MS });
 }
 
 // TOPICS API
 
 async function remoteFetchTopics() {
-  return apiFetch("/topics");
+  return apiFetch("/topics", { timeoutMs: REMOTE_TIMEOUT_MS });
 }
 
 async function remoteCreateTopic(name) {
   return apiFetch("/topics", {
     method: "POST",
     body: JSON.stringify({ name }),
+    timeoutMs: REMOTE_TIMEOUT_MS,
   });
 }
 
 async function remoteDeleteTopic(name) {
   return apiFetch(`/topics/${encodeURIComponent(name)}`, {
     method: "DELETE",
+    timeoutMs: REMOTE_TIMEOUT_MS,
   });
 }
 
@@ -165,7 +171,7 @@ async function remoteDeleteTopic(name) {
 
 async function remoteFetchSlides(topic = "") {
   const query = topic ? `?topic=${encodeURIComponent(topic)}` : "";
-  return apiFetch(`/slides${query}`);
+  return apiFetch(`/slides${query}`, { timeoutMs: REMOTE_TIMEOUT_MS });
 }
 
 async function remoteCreateSlide(slide) {
@@ -178,18 +184,21 @@ async function remoteCreateSlide(slide) {
       media: slide.media,
       type: slide.type,
     }),
+    timeoutMs: REMOTE_TIMEOUT_MS,
   });
 }
 
 async function remoteDeleteSlide(id) {
   return apiFetch(`/slides/${encodeURIComponent(id)}`, {
     method: "DELETE",
+    timeoutMs: REMOTE_TIMEOUT_MS,
   });
 }
 
 async function remoteDeleteSlidesByTopic(topicName) {
   return apiFetch(`/topics/${encodeURIComponent(topicName)}/slides`, {
     method: "DELETE",
+    timeoutMs: REMOTE_TIMEOUT_MS,
   });
 }
 
@@ -198,6 +207,7 @@ async function remoteDeleteSlidesByTopic(topicName) {
 async function remoteDeleteAll() {
   return apiFetch("/all", {
     method: "DELETE",
+    timeoutMs: REMOTE_TIMEOUT_MS,
   });
 }
 

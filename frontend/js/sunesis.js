@@ -333,12 +333,19 @@ async function syncAllRemoteData() {
 // DATABASE FUNCTIONS
 
 // ---- Topics ----
-function createTopic(name) {
-  return new Promise((resolve, reject) => {
+async function createTopic(name) {
+  if (!db) await initDB();
+
+  const activeUser = getActiveUser();
+  const existing = await getTopicByNameLocal(name);
+  if (existing) {
+    showPopup("Topic already exists.", "error");
+    return false;
+  }
+
+  await new Promise((resolve, reject) => {
     const tx = db.transaction("topics", "readwrite");
     const store = tx.objectStore("topics");
-
-    const activeUser = getActiveUser();
     const request = store.add({
       name,
       creator: activeUser,
@@ -346,16 +353,12 @@ function createTopic(name) {
       remoteSynced: false,
     });
 
-    request.onerror = () => {
-      showPopup("Topic already exists.", "error");
-      reject(request.error);
-    };
-
-    tx.oncomplete = () => {
-      showPopup(`The topic "${name}" has been added successfully!`, "success");
-      resolve();
-    };
+    request.onerror = () => reject(request.error);
+    tx.oncomplete = () => resolve();
   });
+
+  showPopup(`The topic "${name}" has been added successfully!`, "success");
+  return true;
 }
 
 function getAllTopics() {
@@ -369,17 +372,20 @@ function getAllTopics() {
 }
 
 // ---- Slides ----
-function addSlide(slide) {
+async function addSlide(slide) {
+  if (!db) await initDB();
+
+  const activeUser = getActiveUser();
+  const slideToSave = {
+    ...slide,
+    creator: activeUser,
+    createdAt: new Date().toISOString(),
+    remoteSynced: false,
+  };
+
   return new Promise((resolve, reject) => {
     const tx = db.transaction("slides", "readwrite");
     const store = tx.objectStore("slides");
-    const activeUser = getActiveUser();
-    const slideToSave = {
-      ...slide,
-      creator: activeUser,
-      createdAt: new Date().toISOString(),
-      remoteSynced: false,
-    };
     const request = store.add(slideToSave);
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
@@ -970,7 +976,15 @@ if (isAdminPage) {
           showPopup("Please enter a topic name.", "error");
           return;
         }
-        await createTopic(name);
+
+        const createdLocally = await createTopic(name);
+        if (!createdLocally) {
+          document.getElementById("topicName").value = "";
+          await loadTopicsAdmin();
+          displayAllTopics();
+          return;
+        }
+
         if (isOnline()) {
           try {
             await remoteCreateTopic(name);
@@ -980,19 +994,16 @@ if (isAdminPage) {
               await saveLocalTopic(topic);
             }
           } catch (error) {
-            if (error.message.includes("Topic already exists")) {
-              const topic = await getTopicByNameLocal(name);
-              if (topic) {
-                topic.remoteSynced = true;
-                await saveLocalTopic(topic);
-              }
-            } else {
-              warnLocalOnlyMode(
-                "Local-only mode active: topic saved only in this browser. It will sync when the connection returns.",
-              );
-            }
+            warnLocalOnlyMode(
+              "Local-only mode active: topic saved in this browser. It will sync when the connection returns.",
+            );
           }
+        } else {
+          warnLocalOnlyMode(
+            "Local-only mode active: topic saved in this browser. It will sync when the connection returns.",
+          );
         }
+
         document.getElementById("topicName").value = "";
         await loadTopicsAdmin();
         displayAllTopics();
@@ -1036,9 +1047,13 @@ if (isAdminPage) {
                 }
               } catch (error) {
                 warnLocalOnlyMode(
-                  "Local-only mode active: slide saved only in this browser. It will sync when the connection returns.",
+                  "Local-only mode active: slide saved in this browser. It will sync when the connection returns.",
                 );
               }
+            } else {
+              warnLocalOnlyMode(
+                "Local-only mode active: slide saved in this browser. It will sync when the connection returns.",
+              );
             }
             displayAllTopics();
             showPopup("Slide added successfully!", "success");
@@ -1060,9 +1075,13 @@ if (isAdminPage) {
               }
             } catch (error) {
               warnLocalOnlyMode(
-                "Local-only mode active: slide saved only in this browser. It will sync when the connection returns.",
+                "Local-only mode active: slide saved in this browser. It will sync when the connection returns.",
               );
             }
+          } else {
+            warnLocalOnlyMode(
+              "Local-only mode active: slide saved in this browser. It will sync when the connection returns.",
+            );
           }
           displayAllTopics();
           showPopup("Slide added successfully!", "success");
