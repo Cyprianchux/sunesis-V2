@@ -11,18 +11,14 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const JWT_SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT || 5500;
+const SUPABASE_TIMEOUT_MS = Number(process.env.SUPABASE_TIMEOUT_MS || 20000);
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment.");
-  process.exit(1);
+let supabase = null;
+
+if (SUPABASE_URL && SUPABASE_KEY) {
+  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
-if (!JWT_SECRET) {
-  console.error("Missing JWT_SECRET in environment.");
-  process.exit(1);
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = express();
 
 app.use(cors());
@@ -36,6 +32,19 @@ function createToken(user) {
   return jwt.sign({ username: user.username, role: user.role }, JWT_SECRET, {
     expiresIn: "7d",
   });
+}
+
+async function runSupabase(operation, fallbackMessage) {
+  if (!supabase) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  return Promise.race([
+    operation(),
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(fallbackMessage)), SUPABASE_TIMEOUT_MS);
+    }),
+  ]);
 }
 
 function authenticate(req, res, next) {
@@ -54,11 +63,15 @@ function authenticate(req, res, next) {
 }
 
 async function getUserByUsername(username) {
-  const { data, error } = await supabase
-    .from("users")
-    .select("username, role, password_hash")
-    .eq("username", username)
-    .single();
+  const { data, error } = await runSupabase(
+    () =>
+      supabase
+        .from("users")
+        .select("username, role, password_hash")
+        .eq("username", username)
+        .single(),
+    "Supabase lookup timed out while loading the user account."
+  );
 
   if (error && error.code !== "PGRST116") {
     throw error;
@@ -76,27 +89,40 @@ app.post("/auth/register", async (req, res) => {
     return res.status(400).json({ message: "Username and password are required." });
   }
 
+  if (!SUPABASE_URL || !SUPABASE_KEY || !JWT_SECRET) {
+    return res.status(503).json({ message: "Authentication service is not configured yet." });
+  }
+
   const normalizedUsername = username.trim().toLowerCase();
   const passwordHash = hashPassword(password);
 
-  const existing = await getUserByUsername(normalizedUsername);
-  if (existing) {
-    return res.status(409).json({ message: "User already exists." });
+  try {
+    const existing = await getUserByUsername(normalizedUsername);
+    if (existing) {
+      return res.status(409).json({ message: "User already exists." });
+    }
+
+    const { error } = await runSupabase(
+      () =>
+        supabase.from("users").insert([
+          {
+            username: normalizedUsername,
+            password_hash: passwordHash,
+            role,
+          },
+        ]),
+      "Supabase registration timed out."
+    );
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    return res.status(201).json({ user: { username: normalizedUsername, role } });
+  } catch (error) {
+    console.error("Register error:", error);
+    return res.status(503).json({ message: error.message || "The auth service is unavailable right now." });
   }
-
-  const { error } = await supabase.from("users").insert([
-    {
-      username: normalizedUsername,
-      password_hash: passwordHash,
-      role,
-    },
-  ]);
-
-  if (error) {
-    return res.status(500).json({ message: error.message });
-  }
-
-  return res.status(201).json({ user: { username: normalizedUsername, role } });
 });
 
 app.post("/auth/login", async (req, res) => {
@@ -106,25 +132,35 @@ app.post("/auth/login", async (req, res) => {
     return res.status(400).json({ message: "Username and password are required." });
   }
 
+  if (!SUPABASE_URL || !SUPABASE_KEY || !JWT_SECRET) {
+    return res.status(503).json({ message: "Authentication service is not configured yet." });
+  }
+
   const normalizedUsername = username.trim().toLowerCase();
-  const existing = await getUserByUsername(normalizedUsername);
 
-  if (!existing) {
-    return res.status(401).json({ message: "Invalid username or password." });
+  try {
+    const existing = await getUserByUsername(normalizedUsername);
+
+    if (!existing) {
+      return res.status(401).json({ message: "Invalid username or password." });
+    }
+
+    const passwordHash = hashPassword(password);
+
+    if (passwordHash !== existing.password_hash) {
+      return res.status(401).json({ message: "Invalid username or password." });
+    }
+
+    const token = createToken({ username: normalizedUsername, role: existing.role });
+
+    return res.json({
+      user: { username: normalizedUsername, role: existing.role },
+      token,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(503).json({ message: error.message || "The auth service is unavailable right now." });
   }
-
-  const passwordHash = hashPassword(password);
-
-  if (passwordHash !== existing.password_hash) {
-    return res.status(401).json({ message: "Invalid username or password." });
-  }
-
-  const token = createToken({ username: normalizedUsername, role: existing.role });
-
-  return res.json({
-    user: { username: normalizedUsername, role: existing.role },
-    token,
-  });
 });
 
 app.get("/auth/me", authenticate, async (req, res) => {

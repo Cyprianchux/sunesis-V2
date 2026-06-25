@@ -73,6 +73,9 @@ async function apiFetch(path, options = {}) {
   }
 
   const url = `${API_BASE_URL}${path}`;
+  const timeoutMs = options.timeoutMs || 20000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   let response;
   try {
@@ -83,10 +86,17 @@ async function apiFetch(path, options = {}) {
       // allow CORS when needed and use same-origin credentials by default
       mode: "cors",
       credentials: "same-origin",
+      signal: controller.signal,
     });
   } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error(`Request timed out after ${timeoutMs}ms`);
+    }
+
     // Network-level errors (DNS, refused connection, etc.)
     throw new Error(`Network error: ${err.message}`);
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   let data = null;
