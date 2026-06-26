@@ -94,28 +94,36 @@ body {
   margin-top: 20px;
 }
 
-.card {
+.card1 {
+  margin-top: 20px;
   background: floralwhite;
-  border-radius: 16px;
-  padding: 18px;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+.card2 {
+  background: floralwhite;
+  border-radius: 0 0 16px 16px;
+  padding: 20px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
-.card h2 {
-  margin: 0 0 8px;
+.card1 h2 {
+  margin-top: 0;
   color: firebrick;
 }
 
-.card p,
-.card li {
+.card1 p,
+.card2 li {
   margin: 0;
   color: #0f426b;
   line-height: 1.6;
 }
 
-.card ul {
+.card2 ul {
   margin: 0;
-  padding-left: 18px;
+  padding-left: 25px;
+  margin-top: -50px;
 }
 
 .content-card {
