@@ -170,9 +170,10 @@ app.get("/auth/me", authenticate, async (req, res) => {
 // Topics routes
 
 app.get("/topics", authenticate, async (req, res) => {
-  const { data, error } = await supabase
-    .from("topics")
-    .select("name, creator, created_at");
+  const { data, error } = await runSupabase(
+    () => supabase.from("topics").select("name, creator, created_at"),
+    "Supabase lookup timed out while loading topics."
+  );
 
   if (error) return res.status(500).json({ message: error.message });
 
