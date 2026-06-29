@@ -18,11 +18,13 @@ let supabase = null;
 
 if (SUPABASE_URL && SUPABASE_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  console.log("SUPABASE_URL =", SUPABASE_URL);
+  console.log("SUPABASE_KEY exists =", !!SUPABASE_KEY);
+  console.log("JWT_SECRET exists =", !!JWT_SECRET);
 }
 
-console.log("SUPABASE_URL =", SUPABASE_URL);
-// console.log("SUPABASE_KEY exists =", !!SUPABASE_KEY);
-console.log("JWT_SECRET exists =", !!JWT_SECRET);
+
 
 const app = express();
 
