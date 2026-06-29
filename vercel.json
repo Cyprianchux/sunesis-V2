@@ -16,8 +16,8 @@
       "permanent": true
     },
     {
-      "source": "/:path.html",
-      "destination": "/:path",
+      "source": "/frontend/:path.html",
+      "destination": "/frontend/:path",
       "permanent": true
     }
   ],
@@ -31,8 +31,8 @@
       "destination": "/index.html"
     },
     {
-      "source": "/:path",
-      "destination": "/:path.html"
+      "source": "/frontend/:path",
+      "destination": "/frontend/:path.html"
     }
   ]
 }
