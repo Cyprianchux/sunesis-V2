@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+// dotenv.config({ path: ".env.local", override: true });
 
 import express from "express";
 import cors from "cors";
@@ -18,6 +19,10 @@ let supabase = null;
 if (SUPABASE_URL && SUPABASE_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 }
+
+console.log("SUPABASE_URL =", SUPABASE_URL);
+// console.log("SUPABASE_KEY exists =", !!SUPABASE_KEY);
+console.log("JWT_SECRET exists =", !!JWT_SECRET);
 
 const app = express();
 
@@ -76,6 +81,9 @@ async function getUserByUsername(username) {
   if (error && error.code !== "PGRST116") {
     throw error;
   }
+
+  console.log(data);
+  console.log(error);
 
   return data;
 }
