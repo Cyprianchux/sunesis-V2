@@ -50,68 +50,72 @@
 
       <div class="account-container" id="auth-section">
         <!-- LOGIN -->
-        <div id="loginBox">
-          <h1>Login</h1>
-          <input id="loginUser" placeholder="Username" />
-          <div class="password-field">
-            <input id="loginPass" type="password" placeholder="Password" />
-            <i
-              class="fa-solid fa-eye toggle-password"
-              onclick="togglePassword('loginPass', this)"
-            ></i>
-          </div>
+        <form onsubmit="event.preventDefault()">
+          <div id="loginBox">
+            <h1>Login</h1>
+            <input id="loginUser" placeholder="Username" />
+            <div class="password-field">
+              <input id="loginPass" type="password" placeholder="Password" />
+              <i
+                class="fa-solid fa-eye toggle-password"
+                onclick="togglePassword('loginPass', this)"
+              ></i>
+            </div>
 
-          <ul class="password-rules" id="loginRules">
-            <li id="login-length">At least 8 characters</li>
-            <li id="login-uppercase">Contains uppercase letter</li>
-            <li id="login-number">Contains a number</li>
-          </ul>
-          <div class="remember-me">
-            <input type="checkbox" id="rememberMe" />
-            <label for="rememberMe"><span>Remember Me</span></label>
+            <ul class="password-rules" id="loginRules">
+              <li id="login-length">At least 8 characters</li>
+              <li id="login-uppercase">Contains uppercase letter</li>
+              <li id="login-number">Contains a number</li>
+            </ul>
+            <div class="remember-me">
+              <input type="checkbox" id="rememberMe" />
+              <label for="rememberMe"><span>Remember Me</span></label>
+            </div>
+            <button type="button" onclick="login()">Login</button>
+            <p>
+              Don’t have an account?
+              <span class="toggle-link" onclick="showRegister()">Register</span>
+            </p>
           </div>
-          <button onclick="login()">Login</button>
-          <p>
-            Don’t have an account?
-            <span class="toggle-link" onclick="showRegister()">Register</span>
-          </p>
-        </div>
+        </form>
 
         <!-- REGISTER -->
-        <div id="registerBox" class="hidden">
-          <h1>Register</h1>
-          <input id="regUser" placeholder="Username" />
-          <div class="password-field">
-            <input id="regPass" type="password" placeholder="Password" />
-            <i
-              class="fa-solid fa-eye toggle-password"
-              onclick="togglePassword('regPass', this)"
-            ></i>
-          </div>
+        <form onsubmit="event.preventDefault()">
+          <div id="registerBox" class="hidden">
+            <h1>Register</h1>
+            <input id="regUser" placeholder="Username" />
+            <div class="password-field">
+              <input id="regPass" type="password" placeholder="Password" />
+              <i
+                class="fa-solid fa-eye toggle-password"
+                onclick="togglePassword('regPass', this)"
+              ></i>
+            </div>
 
-          <div class="password-field">
-            <input
-              id="confirmPass"
-              type="password"
-              placeholder="Confirm Password"
-            />
-            <i
-              class="fa-solid fa-eye toggle-password"
-              onclick="togglePassword('confirmPass', this)"
-            ></i>
-          </div>
+            <div class="password-field">
+              <input
+                id="confirmPass"
+                type="password"
+                placeholder="Confirm Password"
+              />
+              <i
+                class="fa-solid fa-eye toggle-password"
+                onclick="togglePassword('confirmPass', this)"
+              ></i>
+            </div>
 
-          <ul class="password-rules" id="registerRules">
-            <li id="reg-length">At least 8 characters</li>
-            <li id="reg-uppercase">Contains uppercase letter</li>
-            <li id="reg-number">Contains a number</li>
-          </ul>
-          <button onclick="register()">Register</button>
-          <p>
-            Already have an account?
-            <span class="toggle-link" onclick="showLogin()">Login</span>
-          </p>
-        </div>
+            <ul class="password-rules" id="registerRules">
+              <li id="reg-length">At least 8 characters</li>
+              <li id="reg-uppercase">Contains uppercase letter</li>
+              <li id="reg-number">Contains a number</li>
+            </ul>
+            <button type="button" onclick="register()">Register</button>
+            <p>
+              Already have an account?
+              <span class="toggle-link" onclick="showLogin()">Login</span>
+            </p>
+          </div>
+        </form>
       </div>
 
       <section class="features">
