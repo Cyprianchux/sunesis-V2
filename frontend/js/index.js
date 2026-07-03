@@ -16,6 +16,20 @@ function logout() {
   window.location.href = "index.html";
 }
 
+// Loading state management
+function setButtonLoading(button, isLoading) {
+  if (isLoading) {
+    button.classList.add("loading");
+    button.disabled = true;
+    button.dataset.originalText = button.textContent;
+    button.innerHTML = '<span class="button-text">Processing...</span>';
+  } else {
+    button.classList.remove("loading");
+    button.disabled = false;
+    button.textContent = button.dataset.originalText || button.textContent;
+  }
+}
+
 // UI TOGGLE
 function showRegister() {
   loginBox.classList.add("hidden");
@@ -141,6 +155,7 @@ async function register() {
   const username = regUser.value.trim().toLowerCase();
   const password = regPass.value;
   const confirmPassword = confirmPass.value;
+  const registerBtn = document.querySelector("#registerBox button");
 
   if (!username || !password || !confirmPassword) {
     showPopup("All fields are required", "error");
@@ -171,28 +186,36 @@ async function register() {
     return;
   }
 
+  setButtonLoading(registerBtn, true);
+
   if (isOnline()) {
     try {
       await remoteRegister(username, password, role);
       setLocalOnlyMode(false);
       showPopup("Registration successful. Please login.", "success");
       clearInputs(regUser, regPass, confirmPass);
+      setButtonLoading(registerBtn, false);
       showLogin();
       return;
     } catch (error) {
       if (error.message.includes("User already exists")) {
         showPopup(error.message, "error");
+        setButtonLoading(registerBtn, false);
         return;
       }
-      warnLocalOnlyMode(
-        "Local-only mode active: the account was saved in this browser only and will not sync across devices until the connection returns.",
-      );
+      // Remote registration failed - fall through to local-only mode
+      console.log("Remote registration failed:", error.message);
     }
   }
 
+  // If remote failed or offline, save locally immediately (don't wait)
   await saveLocalUser(username, password, role);
+  warnLocalOnlyMode(
+    "Local-only mode active: the account was saved in this browser only and will not sync across devices until the connection returns.",
+  );
   showPopup("Registration successful. Please login.", "success");
   clearInputs(regUser, regPass, confirmPass);
+  setButtonLoading(registerBtn, false);
   showLogin();
 }
 
@@ -200,10 +223,13 @@ async function register() {
 async function login() {
   const username = loginUser.value.trim().toLowerCase();
   const password = loginPass.value;
+  const loginBtn = document.querySelector("#loginBox button");
 
   const users = JSON.parse(localStorage.getItem("sunesis_users")) || {};
   const hash = await hashPassword(password);
   let remoteLoginFailed = false;
+
+  setButtonLoading(loginBtn, true);
 
   if (isOnline()) {
     try {
@@ -226,17 +252,20 @@ async function login() {
     } catch (error) {
       remoteLoginFailed = true;
       if (error.message !== "Offline") {
-        showPopup("Backend login failed. Trying offline mode if available.", "info");
+        console.log("Remote login failed, checking local storage immediately:", error.message);
       }
     }
   }
 
+  // Check local credentials immediately (no 8-second wait)
   if (!users[username] || hash !== users[username].password) {
     showPopup("Invalid username or password", "error");
     clearInputs(loginUser, loginPass);
+    setButtonLoading(loginBtn, false);
     return;
   }
 
+  // Local credentials are valid
   if (rememberMe.checked) {
     localStorage.setItem("sunesis_remember", "true");
     localStorage.setItem("sunesis_user", username);
