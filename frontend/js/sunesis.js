@@ -69,6 +69,20 @@ function warnLocalOnlyMode(message = "Local-only mode active: this browser is st
   showPopup(message, "info");
 }
 
+// Loading state management for buttons
+function setButtonLoading(button, isLoading) {
+  if (isLoading) {
+    button.classList.add("loading");
+    button.disabled = true;
+    button.dataset.originalText = button.textContent;
+    button.innerHTML = '<span class="button-text">Processing...</span>';
+  } else {
+    button.classList.remove("loading");
+    button.disabled = false;
+    button.textContent = button.dataset.originalText || button.textContent;
+  }
+}
+
 async function getTopicByName(name) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction("topics", "readonly");
@@ -972,16 +986,21 @@ if (isAdminPage) {
       .getElementById("createTopicBtn")
       .addEventListener("click", async () => {
         const name = document.getElementById("topicName").value.trim();
+        const createTopicBtn = document.getElementById("createTopicBtn");
+        
         if (!name) {
           showPopup("Please enter a topic name.", "error");
           return;
         }
+
+        setButtonLoading(createTopicBtn, true);
 
         const createdLocally = await createTopic(name);
         if (!createdLocally) {
           document.getElementById("topicName").value = "";
           await loadTopicsAdmin();
           displayAllTopics();
+          setButtonLoading(createTopicBtn, false);
           return;
         }
 
@@ -1007,6 +1026,7 @@ if (isAdminPage) {
         document.getElementById("topicName").value = "";
         await loadTopicsAdmin();
         displayAllTopics();
+        setButtonLoading(createTopicBtn, false);
       });
 
     // Add slide
@@ -1018,11 +1038,14 @@ if (isAdminPage) {
         const desc = document.getElementById("slide-desc").value.trim();
         const mediaFile =
           document.getElementById("slide-media").files[0] || null;
+        const addSlideBtn = document.getElementById("addSlideBtn");
 
         if (!topic || !title) {
           showPopup("Please select a topic and enter a title.", "error");
           return;
         }
+
+        setButtonLoading(addSlideBtn, true);
 
         const slide = {
           topic,
@@ -1060,6 +1083,7 @@ if (isAdminPage) {
             document.getElementById("slide-title").value = "";
             document.getElementById("slide-desc").value = "";
             document.getElementById("slide-media").value = "";
+            setButtonLoading(addSlideBtn, false);
           };
           reader.readAsDataURL(mediaFile);
         } else {
@@ -1088,6 +1112,7 @@ if (isAdminPage) {
           document.getElementById("slide-title").value = "";
           document.getElementById("slide-desc").value = "";
           document.getElementById("slide-media").value = "";
+          setButtonLoading(addSlideBtn, false);
         }
       });
 
@@ -1120,7 +1145,43 @@ if (isAdminPage) {
         }
       });
     }
-  });
+
+    // Floating Action Button - Show/Hide based on scroll
+    const floatingBtn = document.getElementById("floatingAddBtn");
+    const slideContainer = document.getElementById("slideContainer");
+    const addSlideSection = document.querySelector(".add-slide");
+
+    if (floatingBtn && slideContainer) {
+      window.addEventListener("scroll", () => {
+        const slideContainerRect = slideContainer.getBoundingClientRect();
+        
+        // If slideContainer reaches 90px from top of screen, show button
+        if (slideContainerRect.top <= 90) {
+          floatingBtn.style.opacity = "1";
+          floatingBtn.style.pointerEvents = "auto";
+        } else {
+          floatingBtn.style.opacity = "0";
+          floatingBtn.style.pointerEvents = "none";
+        }
+      });
+
+      // Click handler - scroll to add slide section
+      floatingBtn.addEventListener("click", () => {
+        addSlideSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      // Prevent default browser tooltip - show only custom tooltip 
+      /*
+      floatingBtn.addEventListener("mouseleave", () => {
+        floatingBtn.removeAttribute("title");
+      });
+
+      floatingBtn.addEventListener("mouseenter", () => {
+        floatingBtn.setAttribute("title", "Add a Slide or Topic");
+      });
+      */
+    }
+  }); 
 
   function bindAdminActions() {
     document.querySelectorAll(".delete-slide-btn").forEach((btn) => {
