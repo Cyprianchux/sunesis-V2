@@ -13,6 +13,7 @@
 // Derive API base URL dynamically so it works on localhost, file:// pages,
 // and deployed origins without hardcoding domain names.
 const REMOTE_TIMEOUT_MS = 8000;
+const AUTH_TIMEOUT_MS = 3000; // Shorter timeout for auth to fail fast on remote error
 
 const API_BASE_URL = (function () {
   // When running from the filesystem (file://) default to localhost backend
@@ -124,7 +125,7 @@ async function remoteRegister(username, password, role = "user") {
   return apiFetch("/auth/register", {
     method: "POST",
     body: JSON.stringify({ username, password, role }),
-    timeoutMs: REMOTE_TIMEOUT_MS,
+    timeoutMs: AUTH_TIMEOUT_MS,
   });
 }
 
@@ -134,7 +135,7 @@ async function remoteLogin(username, password) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
-      timeoutMs: REMOTE_TIMEOUT_MS,
+      timeoutMs: AUTH_TIMEOUT_MS,
     });
   } catch (err) {
     // Re-throw so callers can handle remote vs offline cases
