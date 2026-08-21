@@ -604,7 +604,7 @@ async function displayAllTopics() {
       <h3>${topic.name}</h3>
       ${manageTopic ? `<button onclick="deleteTopicHandler('${topic.name}')">Delete Topic</button>` : ""}
       ${manageTopic ? `<button onclick="deleteSlidesFromTopicHandler('${topic.name}')">Delete All Slides</button>` : ""}
-      <p style="font-size:0.9rem; color:#666; margin-left:18px;">Created by <strong>${topic.creator || 'Unknown'}</strong></p>
+      <p style="font-size:0.9rem; color:#8c7073; margin-left:18px;">Created by <strong>${topic.creator || 'Unknown'}</strong></p>
     `;
 
     if (topicSlides.length === 0) {
@@ -616,7 +616,7 @@ async function displayAllTopics() {
         const canDelete = canDeleteSlide(slide, topic);
 
         topicDiv.innerHTML += `
-          <div class="slide-item" style="margin:8px 0;padding:8px;border:1.5px solid #ccc;border-radius:8px;">
+          <div class="slide-item" style="margin:8px 0;padding:8px;border:1.5px solid #f0dfdd;border-radius:8px;">
             <h4>${slideTitle}</h4>
             <div class="slide-desc">
               ${formatDescription(slide.desc)}
@@ -628,7 +628,7 @@ async function displayAllTopics() {
                   : `<video src="${slide.media}" width="160" controls></video>`
                 : ""
             }
-            ${canDelete ? `<button class="delete-slide-btn" data-id="${slide.id}">Delete Slide</button>` : `<p style="color:#666; font-size:0.9rem; margin-top:8px;">Created by <strong>${slideOwner}</strong></p>`}
+            ${canDelete ? `<button class="delete-slide-btn" data-id="${slide.id}">Delete Slide</button>` : `<p style="color:#8c7073; font-size:0.9rem; margin-top:8px;">Created by <strong>${slideOwner}</strong></p>`}
           </div>
         `;
       }
@@ -948,7 +948,7 @@ function displayFilteredSlides(filteredSlides) {
   display.innerHTML = filteredSlides
     .map(
       (s) => `
-      <div style="border:1px solid #ccc; padding:10px; margin:8px; border-radius:8px;">
+      <div style="border:1px solid #f0dfdd; padding:10px; margin:8px; border-radius:8px;">
         <h4>${s.title}</h4>
         <div class="slide-body">
           <div class="slide-desc">

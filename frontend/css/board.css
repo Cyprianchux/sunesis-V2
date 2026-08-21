@@ -11,7 +11,8 @@
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
-  background: rgba(0, 0, 0, 0.05);
+  background: #f7eceb;
+  border: 1px solid #f0dfdd;
   padding: 5px;
   border-radius: 10px;
   justify-content: center;
@@ -19,17 +20,17 @@
 
 .board-toolbar button {
   padding: 10px 14px;
-  border: none;
+  border: 1px solid #f0dfdd;
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
-  background: #444;
-  color: white;
+  background: #ffffff;
+  color: #b22222;
   transition: 0.2s ease;
 }
 
 .board-toolbar button:hover {
-  opacity: 0.85;
+  background: #faeceb;
 } 
 
 /* Screen (Typing Area) */
@@ -37,14 +38,14 @@
   width: 100%;
   max-width: 100%;
   min-height: 370px;
-  background: #111;
+  background: #201113;
   color: #fff;
   border-radius: 12px;
   font-size: 20px;
   font-weight: bold;
   line-height: 1.3;
   overflow-y: auto;
-  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 6px 18px rgba(40, 6, 6, 0.35);
   white-space: pre-wrap;
   word-wrap: break-word;
   padding: 5px 10px;
@@ -108,12 +109,12 @@
 }
 
 #deleteLastBtn {
-  background: #444;
+  background: #571313;
   color: white;
 }
 
 #saveBoardBtn {
-  background: darkgreen;
+  background: #b22222;
   color: white;
 }
 
@@ -126,6 +127,6 @@
 .board-screen.light-mode {
   background: white;
   color: black;
-  border: 2px solid #ddd;
+  border: 2px solid #f0dfdd;
 }
 

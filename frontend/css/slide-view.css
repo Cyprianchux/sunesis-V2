@@ -3,11 +3,11 @@ section {
   margin: 20px auto;
   border: 1px solid firebrick;
   border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+  box-shadow: 0 0 10px rgba(87, 19, 19, 0.12);
   padding: 10px;
   box-sizing: border-box;
-  background: #fbf2f2;
-  color: #0b1f6d;
+  background: #fbf5f4;
+  color: #571313;
 }
 
 .display-slide {
@@ -21,7 +21,7 @@ section {
 .slide-viewer {
   position: relative;
   height: calc(114vh - 180px); /* full screen minus top banner & margins */
-  background: #fbf2f2;
+  background: #ffffff;
   border: none;
   box-shadow: none;
   overflow: hidden;
@@ -59,7 +59,7 @@ section {
 .slide-viewer p {
   font-size: 1.4rem;
   font-weight: bold;
-  color: #0b1f6d;
+  color: #571313;
 }
 
 .slide-content img,
@@ -85,7 +85,7 @@ section {
 .slide-desc ul {
   padding-left: 20px;
   margin: 0;
-  color: #0b1f6d;
+  color: #2b1416;
   font-size: 18px;
 }
 
@@ -133,7 +133,7 @@ section {
   background: firebrick;
   transform: translateY(-50%) scale(1.12);
   border-color: firebrick;
-  color: floralwhite;
+  color: #ffffff;
   transition: 0.3s ease;
 }
 
