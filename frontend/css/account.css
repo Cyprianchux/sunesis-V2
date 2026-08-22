@@ -55,6 +55,7 @@ body {
 .topic-card h3 {
   color: var(--brick);
   margin-bottom: 10px;
+  font-size: 16px;
 }
 
 .topic-card button {
@@ -72,6 +73,28 @@ body {
   background-color: #fff;
   color: var(--brick);
   border: 1px solid var(--brick);
+}
+
+.default-topics-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.default-topics-title {
+  color: var(--maroon);
+  margin-bottom: 0;
+}
+
+.default-topics-text {
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.default-topic-card {
+  max-width: 320px;
 }
 /*
 .back-btn {

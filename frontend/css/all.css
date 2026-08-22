@@ -23,9 +23,7 @@ body {
   color: var(--ink);
 }
 
-/* ============================================================
-   TOP BANNER
-   ============================================================ */
+/* TOP BANNER */
 .top-banner {
   position: fixed;
   top: 0;
@@ -47,49 +45,6 @@ body {
   z-index: 10;
 }
 
-/* ----- Brand ----- */
-/*
-.top-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  flex: 1 1 0;
-}
-
-.top-left img {
-  height: clamp(36px, 5vw, 46px);
-  width: auto;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: transform 0.25s ease;
-}
-
-.top-left a:hover img {
-  transform: scale(1.07);
-}
-
-.top-left h1 {
-  margin: 0;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: clamp(1.3rem, 2.6vw, 1.65rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  white-space: nowrap;
-  background: linear-gradient(
-    90deg,
-    var(--brick) 0%,
-    #7a1e4e 48%,
-    #1b1462 80%,
-    #00185c 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: var(--maroon);
-}*/
 .site-header {
   align-items: center; display: flex; justify-content: space-between;
   margin: 0 auto; max-width: 1180px; padding: 0px 10px; width: 100%;

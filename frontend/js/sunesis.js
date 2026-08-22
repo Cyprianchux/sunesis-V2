@@ -1301,7 +1301,7 @@ async function renderTopicCards() {
   container.innerHTML = "";
 
   if (topics.length === 0) {
-    container.innerHTML = "<p>No topics available.</p>";
+    renderDefaultTopics();
     return;
   }
 
@@ -1323,6 +1323,33 @@ async function renderTopicCards() {
 
     container.appendChild(card);
   }
+}
+
+function renderDefaultTopics() {
+  const container = document.getElementById("topicsContainer");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="default-topics-container">
+      <h2 class="default-topics-title">Welcome to Sunesis!</h2>
+      <p class="default-topics-text">
+        You don't have any topics yet. Learn how Sunesis works to create your
+        first one.
+      </p>
+      <div class="topic-card default-topic-card">
+        <h3>Getting Started</h3>
+        <p>
+          New here? Discover the simple flow behind topics and slides on
+          Sunesis.
+        </p>
+        <button
+          onclick="window.location.href='footer-pages.html?page=how-it-works'"
+        >
+          View
+        </button>
+      </div>
+    </div>
+  `;
 }
 
 function openTopic(topicName) {

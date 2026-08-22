@@ -50,6 +50,14 @@ body {
   border-radius: 16px;
 }
 
+.brand { align-items: center; color: var(--maroon); display:flex; font-size: 1.35rem; font-weight: 800; gap: 0px; letter-spacing: -.04em; text-decoration: none; flex-direction: column-reverse; }
+
+.brand span {
+  background: linear-gradient(90deg, var(--brick) 0%, #7a1e4e 48%, #1b1462 80%, #00185c 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: -25px;
+  margin-left: 220px;
+}
+
 .footer-info-content {
   flex: 2 1 360px;
 }

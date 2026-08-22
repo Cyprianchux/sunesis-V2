@@ -10,11 +10,11 @@
   <body>
     <div class="body-container">
       <section class="footer-info">
-        <header class="site-header">
-          <a class="brand" href="index.html" aria-label="Sunesis home">
+        <header class="footer-info-image">
+          <div class="brand" href="../index.html" aria-label="Sunesis home">
             <img src="./images/sunesisBG2.png" alt="" />
             <span>sunesis</span>
-          </a>
+          </div>
         </header>
         <div class="footer-info-content">
           <h1 id="pageTitle">Sunesis</h1>
@@ -37,6 +37,29 @@
     </div>
 
     <script>
+      /* ---------- AUTH GUARD ---------- */
+      function getActiveUser() {
+        const sessionUser = sessionStorage.getItem("sunesis_user");
+        const rememberUser = localStorage.getItem("sunesis_user");
+        const isRemembered = localStorage.getItem("sunesis_remember");
+
+        return sessionUser || (isRemembered ? rememberUser : null);
+      }
+
+      function requireAuth(redirectUrl = "../index.html") {
+        const activeUser = getActiveUser();
+        console.log("Active user:", activeUser);
+
+        if (!activeUser) {
+          console.log("No active user, redirecting to", redirectUrl);
+          window.location.href = redirectUrl;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        requireAuth();
+      });
+
       const pages = {
         "platform-overview": {
           title: "Platform Overview",
