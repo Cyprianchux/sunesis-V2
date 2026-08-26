@@ -8,9 +8,9 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const JWT_SECRET = process.env.JWT_SECRET;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUNESIS_SUPABASE_URL;
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUNESIS_SUPABASE_ANON_KEY;
+const JWT_SECRET = process.env.SUNESIS_SUPABASE_JWT_SECRET;
 const PORT = process.env.PORT || 5500;
 const SUPABASE_TIMEOUT_MS = Number(process.env.SUPABASE_TIMEOUT_MS || 20000);
 
@@ -19,8 +19,6 @@ let supabase = null;
 if (SUPABASE_URL && SUPABASE_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 }
-
-
 
 const app = express();
 

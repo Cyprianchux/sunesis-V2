@@ -27,7 +27,7 @@ const API_BASE_URL = (function () {
     return "http://localhost:5500/api";
   }
 
-  // Otherwise use the current origin so deployed domains (Vercel, Netlify, etc.)
+  // Otherwise use the current origin so the deployed domain (Vercel)
   // resolve the API relative to the site origin.
   return window.location.origin.replace(/\/$/, "") + "/api";
 })();
